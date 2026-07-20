@@ -1,7 +1,7 @@
 students = []
 
 def get_non_empty_input(prompt):
-    """Keep asking until the user enters something other than blank/whitespace."""
+
     while True:
         value = input(prompt).strip()
         if value:
@@ -10,7 +10,7 @@ def get_non_empty_input(prompt):
 
 
 def get_valid_age(prompt):
-    """Keep asking until the user enters a whole number in a sane age range."""
+
     while True:
         value = input(prompt).strip()
         if not value.isdigit():
@@ -149,7 +149,7 @@ def main():
             print("Exiting... Goodbye!")
             break
         else:
-            print("\nInvalid choice. Please enter a number between 1-7.\n")
+            print("Invalid choice. Please enter a number between 1-7.")
 
 
 if __name__ == "__main__":
