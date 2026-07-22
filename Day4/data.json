@@ -1,0 +1,20 @@
+[
+    {
+        "Name": "Ali",
+        "Roll Number": "2025-CE-2",
+        "Course": "Computer Engineering",
+        "Age": 17
+    },
+    {
+        "Name": "Ahmed",
+        "Roll Number": "2025-CE-1",
+        "Course": "Computer Engineering",
+        "Age": 18
+    },
+    {
+        "Name": "Maham",
+        "Roll Number": "2025-CE-3",
+        "Course": "Computer Engineering",
+        "Age": 19
+    }
+]

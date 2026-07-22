@@ -35,7 +35,7 @@ def number_analysis():
 
     # display
     print("\n----- Number Analysis Report -----")
-    print(f"Number Entered      : {original}")
+    print(f"Number Entered       : {original}")
     print(f"Even or Odd          : {even_odd_result}")
     print(f"Prime Check          : {prime_result}")
     print(f"Digit Count          : {digit_count}")
