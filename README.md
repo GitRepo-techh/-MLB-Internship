@@ -36,7 +36,11 @@ File: `student_record_system.py`
 ## 📅 Day 3
 
 **Overview**
+<<<<<<< HEAD
 Day 4 focused on control flow in Python — conditional statements and loops — and on applying them to a series of logic-building problems. The goal was to move beyond syntax and practice structuring a problem in plain English before writing any code.
+=======
+Day 3 focused on control flow in Python — conditional statements and loops — and on applying them to a series of logic-building problems. The goal was to move beyond syntax and practice structuring a problem in plain English before writing any code.
+>>>>>>> 39aaf26c4357c5ad8ebeb15c0d6cb43fb8b4a803
 
 **Concepts Covered**
 - Conditional statements: `if`, `if-else`, `if-elif-else`, nested conditions
@@ -87,7 +91,11 @@ tasks[choice]()   # looks up the function, then calls it
 
 This kept the menu logic short and made it easy to add new problems by just adding a new entry to the dictionary, rather than adding another `elif` branch. The whole menu runs inside a single `while True` loop, so the program keeps prompting the user until they choose to exit.
 
+<<<<<<< HEAD
 File: `day4_conditionals_loops.py`
+=======
+File: `day3_conditionals_loops.py`
+>>>>>>> 39aaf26c4357c5ad8ebeb15c0d6cb43fb8b4a803
 
 ## 🛠️ Tech Stack
 - Python 3
