@@ -1,0 +1,12 @@
+{
+    "books": [
+        {
+            "title": "The Tales of Narnia",
+            "author": "J.H.Arthur",
+            "isbn": "23",
+            "total_copies": 890,
+            "available_copies": 890
+        }
+    ],
+    "members": []
+}
