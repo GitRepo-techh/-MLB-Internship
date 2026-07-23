@@ -161,6 +161,41 @@ The main challenge was a `KeyError` in the Student Record Management System — 
 - Add `.get()` fallbacks in `view_students()` so a missing key shows `"N/A"` instead of crashing
 - Consider re-adding exception handling (`try`/`except`) around file I/O for corrupted or missing JSON files
 
+
+# Day 5 - Object-Oriented Programming (OOP)
+
+## Files in this folder
+- `oop_practice.py` — Student, Employee, and Car classes, each with multiple objects created and demonstrated.
+- `inheritance_practice.py` — Person (parent) class with Student and Teacher (child) classes, demonstrating method overriding and `super()`.
+- `library_management_system.py` — Console-based Library Management System (mini project). Uses `Person → Student, Teacher` inheritance for library members, and `Book`/`Library` classes for the book catalogue. Data is saved to `library_data.json`, which is generated automatically the first time the program runs.
+
+## What is Object-Oriented Programming?
+
+OOP is a way of structuring code around **objects** — self-contained units that bundle together data (attributes) and behavior (methods) — instead of writing a long sequence of unrelated functions and variables.
+
+Instead of managing a book as a loose collection of variables (`title`, `author`, `copies` floating around separately), OOP lets you define a `Book` class that holds all of that data together with the methods that operate on it (`borrow()`, `return_book()`). Each individual book is then an **object** — an instance of that class — with its own values for those attributes.
+
+The four core ideas covered this week are:
+- **Classes and Objects** — a class is the blueprint (e.g. `Book`); an object is a specific instance built from that blueprint (e.g. a copy of "Digital Design").
+- **Inheritance** — a child class (e.g. `Student`) can reuse and extend the attributes/methods of a parent class (e.g. `Person`), avoiding duplicate code.
+- **Encapsulation** — an object controls access to its own data, so it can only be changed through defined, rule-following methods rather than modified directly from anywhere in the program.
+- **Polymorphism** — different classes can expose the same method names (e.g. `area()` on both `Circle` and `Rectangle`) and be used interchangeably.
+
+## Where inheritance was used in this project
+
+In `inheritance_practice.py`, `Student` and `Teacher` both inherit from a shared `Person` class. Both need a `name` and `age`, so that logic lives once in `Person.__init__`, and each child class calls `super().__init__(name, age)` to reuse it instead of repeating the same two lines. Each child class then overrides `role()` and extends `introduce()` with its own extra details (department/roll number for `Student`, subject/employee ID for `Teacher`).
+
+In the Library Management System, the `Library` class doesn't inherit from `Book` — instead it *uses* `Book` objects (a "has-a" relationship rather than "is-a"), which is a deliberate design choice: a library isn't a type of book, so inheritance wouldn't make sense there. This distinction — knowing when *not* to use inheritance — was part of understanding when the concept actually applies.
+
+## Challenges faced and how they were solved
+
+- **Persisting objects to JSON:** JSON can't store Python objects directly, so each `Book` needed a `to_dict()` method to convert it into a plain dictionary before saving, and a `from_dict()` classmethod to rebuild a `Book` object when loading the file back in. This is the main bridge between "objects in memory" and "data on disk."
+- **Handling a missing or corrupted JSON file:** On first run, `books.json` doesn't exist yet. This was handled with an `os.path.exists()` check, plus a `try/except` around `json.load()` to catch a corrupted or empty file (`json.JSONDecodeError`) so the program starts with an empty library instead of crashing.
+- **Preventing invalid borrow/return actions:** A book shouldn't be borrowed if `available_copies` is already 0, or returned if all copies are already accounted for. This was enforced inside the `Book` class itself (`borrow()`/`return_book()` raise a `ValueError`), which is encapsulation in practice — the rule lives with the data it protects, not scattered around the menu-handling code.
+- **Forgetting to write `self` in every method:** In the beginning I kept writing methods like `def borrow(radius):` instead of `def borrow(self, radius):` and Python would throw a `TypeError` about too many arguments. The reason `self` is needed is simple: when you call `book.borrow()`, Python is secretly turning that into `Book.borrow(book)` behind the scenes — it automatically passes the object itself as the first argument, so the method knows *which* object's data to work with. If `self` isn't there to catch it, Python has nowhere to put that object.
+- **Calling `super()` without the parentheses:** I wrote `super.__init__(name, age)` instead of `super().__init__(name, age)` and got a confusing error (`descriptor '__init__' of 'super' object needs an argument`). `super` by itself is just the class, not a usable object — it has to be *called* with `()` first to actually get access to the parent class's methods. Easy to miss because it looks like it should work the same way as referring to `self`.
+## 📌 Notes
+More days and topics will be added here as the internship progresses.
 ---
 
 ## 🛠️ Tech Stack
