@@ -175,5 +175,84 @@ python "day3_conditionals_loops.py"
 python "Day4/Mini Challenge"
 ```
 
+# Day 5 - Object-Oriented Programming (OOP)
+
+## Files in this folder
+- `oop_practice.py` — Student, Employee, and Car classes, each with multiple objects created and demonstrated.
+- `inheritance_practice.py` — Person (parent) class with Student and Teacher (child) classes, demonstrating method overriding and `super()`.
+- `library_management_system.py` — Console-based Library Management System (mini project). Uses `Person → Student, Teacher` inheritance for library members, and `Book`/`Library` classes for the book catalogue. Data is saved to `library_data.json`, which is generated automatically the first time the program runs.
+
+## What is Object-Oriented Programming?
+
+OOP is a way of structuring code around **objects** — self-contained units that bundle together data (attributes) and behavior (methods) — instead of writing a long sequence of unrelated functions and variables.
+
+Instead of managing a book as a loose collection of variables (`title`, `author`, `copies` floating around separately), OOP lets you define a `Book` class that holds all of that data together with the methods that operate on it (`borrow()`, `return_book()`). Each individual book is then an **object** — an instance of that class — with its own values for those attributes.
+
+The four core ideas covered this week are:
+- **Classes and Objects** — a class is the blueprint (e.g. `Book`); an object is a specific instance built from that blueprint (e.g. a copy of "Digital Design").
+- **Inheritance** — a child class (e.g. `Student`) can reuse and extend the attributes/methods of a parent class (e.g. `Person`), avoiding duplicate code.
+- **Encapsulation** — an object controls access to its own data, so it can only be changed through defined, rule-following methods rather than modified directly from anywhere in the program.
+- **Polymorphism** — different classes can expose the same method names (e.g. `area()` on both `Circle` and `Rectangle`) and be used interchangeably.
+
+## Where inheritance was used in this project
+
+In `inheritance_practice.py`, `Student` and `Teacher` both inherit from a shared `Person` class. Both need a `name` and `age`, so that logic lives once in `Person.__init__`, and each child class calls `super().__init__(name, age)` to reuse it instead of repeating the same two lines. Each child class then overrides `role()` and extends `introduce()` with its own extra details (department/roll number for `Student`, subject/employee ID for `Teacher`).
+
+In the Library Management System, the `Library` class doesn't inherit from `Book` — instead it *uses* `Book` objects (a "has-a" relationship rather than "is-a"), which is a deliberate design choice: a library isn't a type of book, so inheritance wouldn't make sense there. This distinction — knowing when *not* to use inheritance — was part of understanding when the concept actually applies.
+
+## Challenges faced and how they were solved
+
+- **Persisting objects to JSON:** JSON can't store Python objects directly, so each `Book` needed a `to_dict()` method to convert it into a plain dictionary before saving, and a `from_dict()` classmethod to rebuild a `Book` object when loading the file back in. This is the main bridge between "objects in memory" and "data on disk."
+- **Handling a missing or corrupted JSON file:** On first run, `books.json` doesn't exist yet. This was handled with an `os.path.exists()` check, plus a `try/except` around `json.load()` to catch a corrupted or empty file (`json.JSONDecodeError`) so the program starts with an empty library instead of crashing.
+- **Preventing invalid borrow/return actions:** A book shouldn't be borrowed if `available_copies` is already 0, or returned if all copies are already accounted for. This was enforced inside the `Book` class itself (`borrow()`/`return_book()` raise a `ValueError`), which is encapsulation in practice — the rule lives with the data it protects, not scattered around the menu-handling code.
+- **Forgetting to write `self` in every method:** In the beginning I kept writing methods like `def borrow(radius):` instead of `def borrow(self, radius):` and Python would throw a `TypeError` about too many arguments. The reason `self` is needed is simple: when you call `book.borrow()`, Python is secretly turning that into `Book.borrow(book)` behind the scenes — it automatically passes the object itself as the first argument, so the method knows *which* object's data to work with. If `self` isn't there to catch it, Python has nowhere to put that object.
+- **Calling `super()` without the parentheses:** I wrote `super.__init__(name, age)` instead of `super().__init__(name, age)` and got a confusing error (`descriptor '__init__' of 'super' object needs an argument`). `super` by itself is just the class, not a usable object — it has to be *called* with `()` first to actually get access to the parent class's methods. Easy to miss because it looks like it should work the same way as referring to `self`.
+
+# Day 6: Python for Data Science — NumPy & Pandas
+
+## What I Learned About NumPy
+
+NumPy is the foundation library for numerical computing in Python — arrays support vector based operations, which makes them much faster than plain Python lists for numeric work. Every ML/data library (Pandas, scikit-learn, etc.) is built on top of it.
+
+Key things I practiced:
+- Creating 1D and 2D arrays with `np.array()`
+- Indexing and slicing (`array[row, col]`, `array[:, col]`) — learned that slicing returns a **view**, not a copy, so editing a slice can change the original array
+- The difference between indexing with a plain integer (collapses a dimension) vs. a slice range like `2:3` (keeps the dimension)
+- Arithmetic operations (`+`, `*`) applied element-wise across arrays, no loops needed
+- Aggregate functions: `.max()`, `.min()`, `.mean()`, `.sum()` — using NumPy's own methods instead of Python's built-in `max()`/`min()` for better performance on large arrays
+- Reshaping arrays with `.reshape()` — learned the rule that while writing your paramters they should always multiply to whatever is the length of your array.
+## What I Learned About Pandas
+
+Pandas builds on NumPy to give you labeled, table form data structures — much closer to how real datasets look (rows and columns, like a spreadsheet).
+
+Key things I practiced:
+- **Series** (a single labeled column) vs. **DataFrame** (a full table)
+- Loading data with `pd.read_csv()` and why file paths are relative to where you have opened teh file i.e the working directory, not the script's location.
+- Exploring a dataset: `.head()`, `.tail()`, `.info()`, `.describe()`, `.shape`, `.columns`
+- Finding missing values with `.isnull().sum()`
+- Selecting columns with `df[["col1", "col2"]]` vs. filtering rows with boolean conditions like `df[df["col"] > value]`
+- Combining multiple conditions with `&`/`|` (not `and`/`or` beacuse they are acustomed to compare a huge set of values at once while & operator is) — and why each condition needs its own parentheses due to operator precedence.
+- Creating new columns by summing existing ones row-wise using `axis=1` in the min challenge.
+- Sorting with `.sort_values()` and combining it with `.head()` to find top performers.
+- Grouping with `.groupby()` for category-level aggregation (e.g., average score per program) — and understanding when to use `groupby` (comparing categories) vs .sorting/filtering (ranking or comparing individuals to a single value)
+- Saving data back out with `.to_csv()`, and why `index=False` avoids writing pandas' internal row numbers into the file
+
+## Key Insights From the Dataset
+
+Using the student performance dataset (20 students, Python/Mathematics/Statistics/Machine_Learning scores + Attendance):
+
+- No missing values in this dataset — a clean baseline for practicing.
+
+- Average scores were fairly close across subjects (Python ~79, Mathematics ~79.5, Statistics ~80.6, Machine_Learning ~82.6), suggesting reasonably consistent performance across subjects rather than one subject dragging the average down.
+
+- Grouping by `Program` showed differences in average performance and attendance between AI, DS, and SE tracks, which wouldn't have been visible from the raw table alone.
+
+## Challenges I Faced
+
+- **File paths**: got a `FileNotFoundError` because `pd.read_csv()` looks relative to the terminal's working directory, not the script's location — had to use the correct relative/full path.
+- **Operator precedence in filters**: writing multi-condition filters without parentheses around each condition (e.g. `df["Program"] == "AI" & df["Attendance"] >= 90`) caused errors, since `&` binds tighter than `==`/`>=` in Python. Learned that you basically have to tell python that these need to be stored in round brackets as if following the `BODMAS` rule (e.g. `df[(df["Program"] == "AI") & (df["Attendance"] >= 90)]`) the extra df actaully helps python tell where exactly the `df[Program]` is located.
+- **Row-wise vs. column-wise operations**: initially unclear on when to use `axis=1` vs the default `axis=0` when summing across subjects per student rather than summing a single column down.
+- **Understanding views vs. copies**: NumPy slices return views by default confused the `:` operation with the slicing one as in `Numpy` it is used to view the cloumns or rows.
+- **Boolean masks vs. filtered data**: mixed up printing a True/False condition (`ab["col"] <= value`) with actually filtering the dataframe (`ab[ab["col"] <= value]`) — needed to see both side by side to understand the difference. Basically understood why we needed two `ab[ab[]]`
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
