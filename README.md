@@ -270,6 +270,10 @@ Student performance analysis using Pandas, Matplotlib, and Seaborn.
 | Bar Chart (dashboard) | Average score per subject |
 | Bar Chart (dashboard) | Top 5 performing students |
 
+
+## Here is the link for the app:
+http://localhost:8501
+
 ## Key Insights
 
 1. **Machine Learning is the class's strongest subject, Python the weakest.** Subject averages: Python 78.9, Mathematics 79.5, Statistics 80.6, Machine Learning 82.6 — a nearly 4-point gap between the highest and lowest averaging subjects.
