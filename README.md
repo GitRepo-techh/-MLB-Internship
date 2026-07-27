@@ -241,5 +241,41 @@ Using the student performance dataset (20 students, Python/Mathematics/Statistic
 - **Row-wise vs. column-wise operations**: initially unclear on when to use `axis=1` vs the default `axis=0` when summing across subjects per student rather than summing a single column down.
 - **Understanding views vs. copies**: NumPy slices return views by default confused the `:` operation with the slicing one as in `Numpy` it is used to view the cloumns or rows.
 - **Boolean masks vs. filtered data**: mixed up printing a True/False condition (`ab["col"] <= value`) with actually filtering the dataframe (`ab[ab["col"] <= value]`) — needed to see both side by side to understand the difference. Basically understood why we needed two `ab[ab[]]`
+
+
+# Day 7 – Data Cleaning & Visualization
+
+Student performance analysis using Pandas, Matplotlib, and Seaborn.
+
+## Data Cleaning Steps
+
+1. **Loaded** `student_performance.csv` with `pandas.read_csv()`.
+2. **Checked for missing values** using `df.isnull().sum()` — dataset had 0 missing values across all 9 columns.
+3. **Checked for duplicate rows** using `df.duplicated().sum()` — 0 duplicates found.
+4. **Applied `dropna()` and `drop_duplicates()` anyway**, as defensive practice, even though they were no-ops on this dataset (real-world data pipelines shouldn't assume clean input).
+5. **Verified data types** with `df.dtypes` — subject scores were already correctly typed as `int64`; no type conversion was needed.
+6. **Created `Average_Score`** — row-wise mean of the four subject columns (`Python`, `Mathematics`, `Statistics`, `Machine_Learning`) using `.mean(axis=1)`.
+7. **Created `Performance`** — categorized each student using `pd.cut()` with bins `[0, 70, 80, 90, 101]` and labels `Needs Improvement / Average / Good / Excellent`, using `right=False` so boundary scores (e.g. exactly 80 or 90) fall into the correct higher category.
+8. **Saved the cleaned dataset** as `cleaned_student_performance.csv`.
+
+## Visualizations Created
+
+| Chart | Purpose |
+|---|---|
+| Bar Chart | Average score per student |
+| Histogram | Distribution of Average Scores across the class |
+| Scatter Plot | Python marks vs Machine Learning marks (checking correlation) |
+| Pie Chart | Breakdown of students by Performance category |
+| Box Plot | Spread and outliers of marks across all four subjects |
+| Bar Chart (dashboard) | Average score per subject |
+| Bar Chart (dashboard) | Top 5 performing students |
+
+## Key Insights
+
+1. **Machine Learning is the class's strongest subject, Python the weakest.** Subject averages: Python 78.9, Mathematics 79.5, Statistics 80.6, Machine Learning 82.6 — a nearly 4-point gap between the highest and lowest averaging subjects.
+
+2. **Python and Machine Learning scores are very strongly correlated** (r ≈ 0.98) — students who score well in Python almost always score well in Machine Learning, suggesting the two skills reinforce each other rather than being independent.
+
+3. **The class splits evenly between strong and struggling performers.** 10 of 20 students (50%) fall into "Good" or "Excellent," while 4 students (20%) fall into "Needs Improvement" — most notably Hassan Tariq (58.75) and Danish Ali (64.00), who are furthest from the class average and may benefit from targeted support.
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
