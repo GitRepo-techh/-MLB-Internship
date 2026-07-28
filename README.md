@@ -277,5 +277,51 @@ Student performance analysis using Pandas, Matplotlib, and Seaborn.
 2. **Python and Machine Learning scores are very strongly correlated** (r ≈ 0.98) — students who score well in Python almost always score well in Machine Learning, suggesting the two skills reinforce each other rather than being independent.
 
 3. **The class splits evenly between strong and struggling performers.** 10 of 20 students (50%) fall into "Good" or "Excellent," while 4 students (20%) fall into "Needs Improvement" — most notably Hassan Tariq (58.75) and Danish Ali (64.00), who are furthest from the class average and may benefit from targeted support.
+
+
+
+# Day 8 — Data Preprocessing & First ML Model (Student Score Prediction System)
+
+## What I Learned About Data Preprocessing
+
+- **Not every column is a feature.** Identifier columns like `Student_ID` and `Name` carry no real predictive relationship with the target — they had to be dropped, otherwise the model would either ignore them or overfit to meaningless noise.
+- **Avoiding a circular target.** My target, `Average_score`, is the mean of `Python`, `Mathematics`, `Statistics`, and `Machine_Learning`. Using those same four columns as features would let the model just do arithmetic instead of actually learning a relationship — so the real features I used were `Age`, `Attendance`, and `Program` instead.
+- **Categorical encoding.** `Program` (`AI`, `SE`, `DS`) is a **nominal** category — no natural order — so I used **One-Hot Encoding** (`OneHotEncoder(drop="first")`) rather than Label Encoding, which is meant for **ordinal** categories where order matters (e.g. Low/Medium/High).
+- **Feature scaling.** I standardized `Age` and `Attendance` using `StandardScaler` so both features are on a comparable scale (mean 0, standard deviation 1) before training.
+- **Data leakage.** The scaler and encoder must be **fit only on training data**, then just **applied (transformed)** to the test data. Fitting on the full dataset before splitting would let information from the test set leak into training, making evaluation metrics look better than they really are.
+
+## Why Train-Test Splitting Is Important
+
+Splitting data into training and testing sets lets you check whether a model has actually learned a generalizable pattern, or just memorized the training data. Training and evaluating on the same data would give a falsely optimistic performance score with no way to know how the model handles new, unseen students. I used an 80/20 split (`train_test_split(..., test_size=0.2, random_state=42)`), with `random_state` fixed so the split — and therefore my results — are reproducible on every run.
+
+## Evaluation Metrics Used
+
+- **MAE (Mean Absolute Error)** — average size of prediction errors, in the same units as the score.
+- **MSE (Mean Squared Error)** — similar to MAE, but squares errors first, so larger mistakes are penalized more heavily.
+- **R² Score** — proportion of variance in the actual scores that the model explains (1.0 = perfect fit, 0 = no better than predicting the mean, negative = worse than predicting the mean).
+
+## Model Performance & Observations
+
+> Fill in your actual printed values here after running `app.py` or the script — they'll vary slightly depending on the random train-test split:
+
+- MAE: `___`
+- MSE: `___`
+- R² Score: `___`
+
+**Observations:**
+- With only 20 rows total, the test set is just 4 rows (at an 80/20 split). This is a very small sample to judge model performance on — R² in particular can look unstable or even negative purely due to dataset size, not necessarily a flaw in the model or code.
+- Points on the Actual vs Predicted scatter plot that fall close to the red diagonal line are accurate predictions; points that scatter far from it show where the model struggled.
+- A larger, more varied dataset (more students, more spread in attendance/age/program) would likely give a more stable and trustworthy evaluation.
+
+## Files
+
+- `app.py` — Streamlit app implementing the full pipeline: load → preprocess (target creation, encoding, scaling) → train-test split → train Linear Regression → evaluate (MAE/MSE/R²) → Actual vs Predicted table → scatter plot → live prediction on new input.
+- `student_performance.csv` — dataset (optional to include; `app.py` falls back to a built-in sample dataset if this file isn't present, and also supports uploading a CSV directly in the app).
+
+## Run It
+
+```powershell
+uv run streamlit run app.py
+```
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
