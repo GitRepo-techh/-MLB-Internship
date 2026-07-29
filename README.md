@@ -327,5 +327,136 @@ Splitting data into training and testing sets lets you check whether a model has
 ```powershell
 uv run streamlit run app.py
 ```
+
+
+# Day 9 — Model Evaluation & Classification
+
+## What is Classification?
+
+Classification is a supervised machine learning task where the model predicts a
+**discrete category (class label)** rather than a continuous number. The model
+learns from labeled examples and assigns new, unseen data points to one of a
+fixed set of classes.
+
+Example in this project: given four flower measurements (sepal length, sepal
+width, petal length, petal width), predict which of three Iris species
+(*setosa*, *versicolor*, *virginica*) the flower belongs to.
+
+## Regression vs Classification
+
+| | Regression | Classification |
+|---|---|---|
+| Output | Continuous numeric value | Discrete class/category |
+| Example | Predicting house price | Predicting flower species |
+| Algorithms | Linear Regression | Logistic Regression, Decision Trees |
+| Evaluation | MAE, MSE, R² | Accuracy, Precision, Recall, F1, Confusion Matrix |
+
+Regression answers "how much / how many?" while classification answers
+"which category?"
+
+## Real-World Classification Examples
+
+- Email spam detection (spam / not spam)
+- Medical diagnosis (disease present / absent)
+- Loan default prediction (default / no default)
+- Sentiment analysis (positive / negative / neutral)
+
+## Evaluation Metrics Used
+
+- **Accuracy** — percentage of total predictions that were correct. Can be
+  misleading on imbalanced datasets.
+- **Precision** — of everything the model predicted as a given class, how
+  many were actually that class. Matters when false positives are costly.
+- **Recall** — of everything that actually belongs to a class, how many did
+  the model correctly find. Matters when false negatives are costly.
+- **F1-Score** — harmonic mean of precision and recall; a single balanced
+  metric when both false positives and false negatives matter.
+- **Confusion Matrix** — a table showing actual vs. predicted labels per
+  class, revealing exactly *where* the model gets confused (e.g. mixing up
+  versicolor and virginica), not just an overall score.
+
+Since Iris is a **multi-class, balanced** dataset, macro-averaged precision,
+recall, and F1 were used (each class weighted equally).
+
+## Model Performance & Observations
+
+| Metric | Logistic Regression | Decision Tree (max_depth=3) |
+|---|---|---|
+| Accuracy | 0.9667 | 0.9667 |
+| Precision (macro) | 0.9697 | 0.9697 |
+| Recall (macro) | 0.9667 | 0.9667 |
+| F1-Score (macro) | 0.9666 | 0.9666 |
+
+**Confusion Matrix (both models, test set of 30):**
+```
+[[10  0  0]   setosa      -> all 10 correctly classified
+ [ 0  9  1]   versicolor  -> 1 misclassified as virginica
+ [ 0  0 10]]  virginica   -> all 10 correctly classified
+```
+
+**Observations:**
+- *Setosa* is perfectly separated in every run — its petal measurements are
+  distinctly different from the other two species, so both models classify
+  it with 100% accuracy.
+- The only confusion happens between *versicolor* and *virginica*, which
+  have overlapping petal length/width ranges — this is a well-known
+  characteristic of the Iris dataset, not a modeling flaw.
+- Logistic Regression and the depth-limited Decision Tree performed
+  identically on this split, which makes sense: Iris classes are nearly
+  linearly separable, so a linear decision boundary (Logistic Regression)
+  is already close to optimal, and a shallow tree just approximates similar
+  boundaries with axis-aligned splits.
+- An unconstrained (unpruned) Decision Tree can overfit the training data
+  perfectly but perform worse on unseen data — this is why `max_depth=3` was
+  used, tying back to today's overfitting/underfitting topic.
+
+## Live App
+
+🔗 **Streamlit App:** [add your deployed link here after deploying, e.g. https://mlb-internship-day9-yourname.streamlit.app]
+
+The app has three tabs:
+- **📊 Dataset** — dataset preview, class balance, statistical summary, feature pairplot
+- **🎯 Model Evaluation** — accuracy/precision/recall/F1 and confusion matrix for both Logistic Regression and Decision Tree
+- **🔮 Try a Prediction** — interactive sliders for the four flower measurements, returns predicted species with class probabilities
+
+## Files in this folder
+
+- `classification_practice.py` — Day 9 coding practice tasks (load, explore,
+  split, train Logistic Regression, evaluate, confusion matrix)
+- `iris_classification_project.py` — Mini project: full Iris Flower
+  Classification System with Logistic Regression + bonus Decision Tree
+  comparison
+- `app.py` — Streamlit web app version of the classification system
+  (Dataset / Model Evaluation / Try a Prediction tabs)
+- `requirements.txt` — dependencies needed to run/deploy `app.py`
+- `confusion_matrix.png` / `confusion_matrix_logistic_regression.png` /
+  `confusion_matrix_decision_tree.png` — confusion matrix screenshots
+- `iris_pairplot.png` — exploratory data visualization
+- `model_comparison.csv` — side-by-side metric comparison
+
+## How to Run
+
+**Run the practice/project scripts:**
+```bash
+pip install scikit-learn pandas matplotlib seaborn
+python classification_practice.py
+python iris_classification_project.py
+```
+
+**Run the Streamlit app locally:**
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+**Deploy the app for a public link (used for the Discord/submission link):**
+1. Push this folder to the `MLB-Internship` GitHub repo
+2. Go to [share.streamlit.io](https://share.streamlit.io) and sign in with GitHub
+3. Click "New app" → select this repo → set main file path to `Day-9/app.py`
+4. Click Deploy — you'll get a public `https://...streamlit.app` link
+
+
+
+
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
