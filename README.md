@@ -456,7 +456,139 @@ streamlit run app.py
 4. Click Deploy — you'll get a public `https://...streamlit.app` link
 
 
+# Day 10 — Model Evaluation & Hyperparameter Tuning (Breast Cancer Prediction System)
 
+## What is Model Evaluation?
+
+Training a model is only half the job — evaluation is how you find out whether
+it actually generalizes, or just memorized the training set. Today's focus was
+on the workflow that comes *after* `model.fit()`: measuring performance
+properly, understanding *why* a model over/underperforms, and then improving
+it in a structured way rather than guessing at parameters.
+
+**Topics Covered**
+- Train vs. Test performance — comparing scores on both sets to spot a gap
+  that signals over/underfitting
+- Underfitting vs. Overfitting — a model too simple to capture the pattern
+  vs. one that has memorized noise in the training data
+- Cross-Validation — splitting the training data into multiple folds so a
+  model's score isn't dependent on one lucky/unlucky split
+- Learning Curves (concept) — plotting training size vs. score to visualize
+  whether more data would help, or whether the model has plateaued
+- Choosing the right evaluation metric — accuracy isn't always the right
+  call, especially on imbalanced or high-stakes classification tasks (e.g.
+  medical diagnosis, where **recall** matters more than accuracy)
+
+## What is Hyperparameter Tuning?
+
+Hyperparameters are settings chosen *before* training (e.g. `C`, `penalty`,
+`solver` for Logistic Regression) — as opposed to parameters the model learns
+on its own (the coefficients). Picking good hyperparameters can meaningfully
+change a model's performance, but testing every combination by hand doesn't
+scale.
+
+- **GridSearchCV** — exhaustively tries every combination in a parameter grid,
+  cross-validating each one, and returns the best-scoring combination
+- **RandomizedSearchCV (concept)** — samples a fixed number of random
+  combinations instead of every single one, trading a small amount of
+  thoroughness for much faster search on large grids
+- Why tuning matters — the default hyperparameters are a reasonable starting
+  point, not necessarily the best fit for a specific dataset
+- Selecting the best model — `GridSearchCV` exposes `.best_params_`,
+  `.best_score_`, and `.best_estimator_` so the tuned model can be evaluated
+  the same way as the baseline for a fair comparison
+
+## Practice: Breast Cancer Wisconsin Dataset
+
+Using the built-in Scikit-learn dataset:
+1. Loaded the data and converted it into a Pandas DataFrame; explored it with
+   `.head()`, `.info()`, `.describe()`, and checked the target class balance
+2. **Baseline model** — split the data (80/20, stratified), scaled features
+   with `StandardScaler`, trained a plain `LogisticRegression`, and evaluated
+   it with Accuracy, Precision, Recall, F1-Score, and a confusion matrix
+3. **Hyperparameter tuning** — ran `GridSearchCV` (`cv=5`, scoring=`recall`)
+   over a grid of `C`, `penalty`, and `solver` values, then compared the tuned
+   model's metrics against the baseline
+
+## Evaluation Metrics Used
+
+- **Accuracy** — overall percentage of correct predictions
+- **Precision** — of predicted-malignant cases, how many were truly malignant
+- **Recall** — of truly malignant cases, how many the model actually caught
+  (chosen as the `GridSearchCV` scoring metric, since missing a malignant
+  case is far more costly than a false alarm)
+- **F1-Score** — balances precision and recall into one number
+- **Confusion Matrix** — visualizes exactly which cases were mixed up, and in
+  which direction
+
+## Model Performance & Observations
+
+> Fill in your actual printed values here after running the pipeline:
+
+| Metric | Baseline | Tuned |
+|---|---|---|
+| Accuracy | `___` | `___` |
+| Precision | `___` | `___` |
+| Recall | `___` | `___` |
+| F1-Score | `___` | `___` |
+
+**Best Parameters (GridSearchCV):** `___`
+
+**Observations:**
+- Tuning didn't necessarily beat the baseline on every metric — with `recall`
+  as the scoring target, `GridSearchCV` explicitly favors catching more true
+  positives, sometimes at a small cost to precision or accuracy.
+- The baseline model already performs strongly on this dataset (it's a fairly
+  clean, well-separated one), so gains from tuning are often modest — the
+  value of the exercise is in the *process* of comparing before/after fairly,
+  not necessarily a dramatic score jump.
+
+## Mini Project — Breast Cancer Prediction System (Streamlit App)
+
+Built a full Streamlit app around the pipeline instead of a script with
+printed output, so the workflow is interactive and shareable:
+
+- **📊 Data Exploration** — key metric cards (samples, features, class
+  counts, missing-value check), a target-class pie chart, an interactive
+  per-feature histogram (pick any feature, see its distribution split by
+  class), and a boxplot comparing the highest-variance features across
+  classes — replacing raw `.info()`/`.describe()` text dumps with visuals
+- **📈 Baseline Model** — trains the untuned `LogisticRegression`, shows its
+  metrics and confusion matrix
+- **🔧 Hyperparameter Tuning** — runs `GridSearchCV`, displays the best
+  parameters/CV score, and the tuned model's metrics and confusion matrix
+- **⚖️ Comparison** — a side-by-side baseline vs. tuned metrics table with a
+  per-metric improvement column, plus a grouped bar chart
+
+Sidebar controls (test size, random state, CV folds, scoring metric) let you
+re-run the whole pipeline with different settings without touching the code.
+
+## Challenges Faced
+
+- Deciding what belonged on the front page vs. behind a button — the first
+  version of the app dumped raw `df.info()`/`df.describe()` output straight
+  onto the page, which read as cluttered and code-like rather than a
+  presentable dashboard. Replaced both with metric cards and charts, and
+  tucked the raw row preview into a collapsed expander instead.
+- `st.cache_data` vs. `st.cache_resource` — DataFrames and split arrays use
+  `cache_data`, but the trained model objects (`LogisticRegression`,
+  `GridSearchCV`) needed `cache_resource` instead, since they aren't
+  plain serializable data.
+
+## Files
+
+- `breast_cancer_classification.py` — practice script covering baseline
+  training, `GridSearchCV` tuning, and before/after comparison
+- `app.py` — Streamlit app implementing the full pipeline: load → explore →
+  scale → baseline model → `GridSearchCV` tuning → evaluate → confusion
+  matrices → comparison
+
+## Run It
+
+```powershell
+uv add streamlit scikit-learn seaborn matplotlib pandas
+uv run streamlit run app.py
+```
 
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
