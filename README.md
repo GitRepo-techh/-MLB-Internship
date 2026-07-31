@@ -590,5 +590,77 @@ uv add streamlit scikit-learn seaborn matplotlib pandas
 uv run streamlit run app.py
 ```
 
+# Day 11 — Unsupervised Learning: Clustering & Dimensionality Reduction
+
+## Overview
+
+This folder contains my work on unsupervised learning techniques, applied to the Iris dataset (built into scikit-learn). The two techniques covered are **K-Means Clustering** and **Principal Component Analysis (PCA)**.
+
+Unlike supervised learning, unsupervised learning works without target labels — the goal is to discover hidden structure or patterns in the data on its own.
+
+## What is Clustering?
+
+Clustering is the task of grouping similar data points together based on how close they are to each other, without being told in advance what the groups should be. **K-Means** is one common clustering algorithm:
+
+1. Choose a number of clusters, K
+2. Randomly place K centroids
+3. Assign every data point to its nearest centroid
+4. Move each centroid to the average position of the points assigned to it
+5. Repeat steps 3–4 until the centroids stop moving (convergence)
+
+## What is PCA?
+
+PCA (Principal Component Analysis) is a dimensionality reduction technique. It compresses data with many features down into fewer new features (principal components), while preserving as much of the original variance (information) as possible.
+
+- **PC1** is the direction of maximum variance in the data
+- **PC2** is the direction of the next-highest variance, constrained to be perpendicular (orthogonal) to PC1
+
+Data points are then re-plotted using their projection onto PC1 and PC2 instead of their original features — making high-dimensional data visualizable in 2D.
+
+PCA matters here because the Iris dataset has 4 features (sepal length, sepal width, petal length, petal width), which can't be visualized directly on one 2D plot. PCA compresses those 4 features down to 2, while keeping most of the meaningful structure intact.
+
+## How I Determined the Best Value of K
+
+I used the **Elbow Method**: fit K-Means for K = 1 through 7, recorded the `inertia_` (sum of squared distances from points to their assigned centroid) for each, and plotted K against inertia.
+
+Inertia values obtained:
+
+| K | Inertia |
+|---|---------|
+| 1 | 681.37 |
+| 2 | 152.35 |
+| 3 | 78.86 |
+| 4 | 57.35 |
+| 5 | 46.47 |
+| 6 | 39.07 |
+| 7 | 34.31 |
+
+The inertia drops sharply from K=1 to K=3, then flattens out — the "elbow" sits at **K = 3**, which conveniently matches the 3 real Iris species (setosa, versicolor, virginica), even though the model never saw the species labels.
+
+## Insights from the Visualizations
+
+- **Original data (petal length vs petal width), colored by true species** — setosa is clearly separated from the other two species, while versicolor and virginica overlap slightly.
+- **K-Means clusters (same features, colored by predicted cluster)** — the clustering closely mirrors the true species groupings. Setosa is separated perfectly; a small number of versicolor and virginica flowers get assigned to the "wrong" cluster due to their overlapping petal measurements.
+- **PCA visualization (2 principal components, colored by K-Means cluster)** — the same 3-cluster structure is still clearly visible after compressing from 4 features down to 2, confirming that very little useful information was lost.
+
+**Explained variance ratio:** `[0.7296, 0.2285]`
+**Total variance retained:** ~95.8%
+
+This means PC1 alone captures ~73% of the total variance in the original 4 features, and PC2 adds another ~23% — together preserving almost all (95.8%) of the meaningful information while cutting the dimensionality in half.
+
+A cross-tabulation of true species vs K-Means cluster confirmed this numerically: setosa maps to one cluster with zero mixing, while versicolor and virginica show a small amount of overlap between clusters — consistent with what's visible in the scatter plots.
+
+## Files in This Folder
+
+- `dataset_exploration.py` — loading Iris into a Pandas DataFrame and exploring it
+- `kmeans_script.py` — K-Means clustering and elbow method
+- `pca_script.py` — standardization and PCA
+- `mini_project.py` — combined script producing the full comparison visualization
+- `elbow_plot.png`
+- `kmeans_scatter.png`
+- `pca_scatter.png`
+- `comparison_plot.png`
+- `README.md` — this file
+
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
