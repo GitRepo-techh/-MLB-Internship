@@ -662,5 +662,123 @@ A cross-tabulation of true species vs K-Means cluster confirmed this numerically
 - `comparison_plot.png`
 - `README.md` — this file
 
+
+
+
+# Day 12 – Introduction to Deep Learning & First ANN
+
+## 📌 Overview
+This day marks the start of Phase 2 (Deep Learning) of the MLB Internship. It covers the fundamentals of neural networks — perceptrons, activation functions, and building a first Artificial Neural Network (ANN) — followed by a mini project classifying clothing images using the Fashion MNIST dataset.
+
+---
+
+## 🧠 What is Deep Learning?
+
+Deep Learning is a subfield of Machine Learning based on **Artificial Neural Networks (ANNs)** with multiple layers ("deep" architectures). Instead of relying on manually engineered features, deep learning models automatically learn hierarchical patterns directly from raw data (images, text, audio, etc.) by adjusting internal weights through a process called **backpropagation**.
+
+## ⚖️ Machine Learning vs Deep Learning
+
+| Aspect | Machine Learning | Deep Learning |
+|---|---|---|
+| Feature engineering | Manual (you design features) | Automatic (network learns features) |
+| Data requirement | Works well on smaller datasets | Needs large datasets to perform well |
+| Compute requirement | Lower | Higher (benefits from GPU/TPU) |
+| Interpretability | Generally more interpretable | Often a "black box" |
+| Example algorithms | Logistic Regression, Decision Trees, KNN, SVM | ANN, CNN, RNN, Transformers |
+
+## 🌍 Applications of Deep Learning
+- Image classification & object detection
+- Computer vision (face recognition, medical imaging)
+- Natural Language Processing (translation, chatbots, sentiment analysis)
+- Speech recognition
+- Recommendation systems
+- Autonomous vehicles
+
+## 🏗️ Artificial Neural Networks (ANN)
+
+An ANN is composed of layers of interconnected neurons, loosely inspired by the structure of the human brain:
+
+- **Input Layer** – receives the raw data (e.g., pixel values of an image). It doesn't perform computation; it just defines the shape of the incoming data.
+- **Hidden Layer(s)** – perform weighted computations on the inputs and apply an activation function to learn complex, non-linear patterns.
+- **Output Layer** – produces the final prediction (e.g., class probabilities for classification tasks).
+
+Each connection between neurons has a **weight**, and each neuron has a **bias** — these are the parameters the network learns during training.
+
+## ⚡ What is a Perceptron?
+
+A perceptron is the simplest unit of a neural network — a single neuron that:
+1. Takes one or more inputs
+2. Multiplies each input by a weight and sums them, adding a bias
+3. Passes that sum through an **activation function** to produce an output
+
+It was the original building block used for simple binary classification, and multiple perceptrons stacked in layers form a full ANN (technically called a Multi-Layer Perceptron, or MLP).
+
+## 🔥 Activation Functions Explored
+
+Activation functions introduce **non-linearity** into the network — without them, a neural network (no matter how many layers) would behave like a single linear model and couldn't learn complex patterns.
+
+| Activation | Range | Commonly Used In |
+|---|---|---|
+| **ReLU** (Rectified Linear Unit) | 0 to ∞ | Hidden layers of most modern networks — fast, avoids vanishing gradient for positive values |
+| **Sigmoid** | 0 to 1 | Output layer of binary classification problems |
+| **Tanh** | -1 to 1 | Hidden layers, especially in RNNs — zero-centered output |
+| **Softmax** | 0 to 1 (sums to 1 across outputs) | Output layer of multi-class classification problems |
+
+**Why they matter:** Activation functions don't change the number of parameters in a layer — they only change the mathematical transformation applied to each neuron's weighted sum, which determines how the network expresses non-linear relationships in the data.
+
+---
+
+## 🧪 Coding Practice Summary
+
+- **Practice 1:** Installed and verified TensorFlow/Keras in an isolated `uv`-managed Python 3.12 virtual environment (required since TensorFlow doesn't yet support Python 3.14).
+- **Practice 2:** Built a simple ANN (Input → Hidden Dense(128, ReLU) → Output Dense(10, Softmax)) and inspected `model.summary()`, including how parameter counts are calculated: `(inputs × neurons) + neurons` per Dense layer.
+- **Practice 3:** Compared ReLU, Sigmoid, and Tanh activations in the hidden layer — confirmed that total parameter count stays identical (101,770) across all three, since activation functions only affect the per-neuron math, not the number of weights/biases.
+
+---
+
+## 🖼️ Mini Project: Fashion MNIST ANN
+
+**Dataset:** Fashion MNIST (60,000 training images, 10,000 test images, 28×28 grayscale, 10 clothing categories)
+
+**Pipeline:**
+1. Loaded the dataset via `tensorflow.keras.datasets.fashion_mnist`
+2. Explored shapes, labels, and visualized sample images
+3. Normalized pixel values from [0, 255] to [0, 1]
+4. Built an ANN: `Flatten → Dense(128, ReLU) → Dense(10, Softmax)`
+5. Compiled with Adam optimizer and sparse categorical crossentropy loss
+6. Trained for 10 epochs with a 20% validation split
+7. Evaluated on the held-out test set
+8. Plotted training/validation accuracy curves
+9. Displayed sample predictions vs actual labels
+
+### 📊 Results
+
+| Metric | Value |
+|---|---|
+| Final Training Accuracy | _fill in from your `history.history['accuracy'][-1]`_ |
+| Final Validation Accuracy | _fill in from your `history.history['val_accuracy'][-1]`_ |
+| Test Accuracy | _fill in from `test_accuracy` printed output_ |
+| Test Loss | _fill in from `test_loss` printed output_ |
+
+*(Replace the placeholders above with the actual numbers from your terminal output once training completes.)*
+
+---
+
+## 📂 Files in this Folder
+- `practice1_verify.py` – TensorFlow/Keras installation verification
+- `practice2_ann.py` – Simple ANN architecture + model summary
+- `practice3_activations.py` – Activation function comparison
+- `Mini Project.py` – Full Fashion MNIST ANN pipeline
+- `sample_images.png` – Sample dataset images with labels
+- Training accuracy graph (add after plotting)
+- Sample prediction images (add after prediction step)
+
+---
+
+## ✅ Key Takeaways
+- Deep learning automates feature learning through layered neural networks, unlike traditional ML which relies on manual feature engineering.
+- A perceptron is the fundamental computational unit of a neural network.
+- Activation functions are essential for enabling networks to learn non-linear, complex patterns.
+- Even a simple ANN (no CNN) can achieve strong accuracy on Fashion MNIST, since the dataset is relatively low-resolution and well-structured.
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
