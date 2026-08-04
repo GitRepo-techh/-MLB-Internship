@@ -780,5 +780,92 @@ Activation functions introduce **non-linearity** into the network — without th
 - A perceptron is the fundamental computational unit of a neural network.
 - Activation functions are essential for enabling networks to learn non-linear, complex patterns.
 - Even a simple ANN (no CNN) can achieve strong accuracy on Fashion MNIST, since the dataset is relatively low-resolution and well-structured.
+
+
+# Day 13 — Convolutional Neural Networks (CNNs) & Fashion MNIST Classifier
+
+## Overview
+
+This folder contains the Day 13 deliverables for the MLB Internship: CNN practice exercises and a full Fashion MNIST image classifier built with TensorFlow/Keras.
+
+## Contents
+
+| File | Description |
+|---|---|
+| `Practice1.py` | Loads Fashion MNIST, visualizes 10 sample images, normalizes pixel values |
+| `Practice2_CNN.py` | Builds and trains a CNN (Conv → Pool → Flatten → Dense → Output) |
+| `Practice3.py` | Evaluates the trained model, shows sample predictions |
+| `fashion_mnist_classifier.py` | Full mini project: training, evaluation, accuracy/loss curves, confusion matrix, correct/incorrect prediction grids |
+| `app.py` | Streamlit app for interactive classification |
+| `mp_accuracy_loss_curves.png` | Training vs validation accuracy and loss |
+| `mp_confusion_matrix.png` | Confusion matrix across all 10 classes |
+| `mp_correct_predictions.png` | 10 correctly classified sample images |
+| `mp_incorrect_predictions.png` | 10 incorrectly classified sample images |
+
+## Why CNNs are better than ANNs for image data
+
+A plain ANN flattens an image into a 1D vector before the network sees it, which throws away spatial relationships between nearby pixels (e.g. that an eye sits next to a nose). It also needs a separate weight for every pixel-to-neuron connection, which becomes huge and inefficient as image size grows.
+
+CNNs instead slide small filters across the image, preserving 2D spatial structure and reusing the same filter weights at every position. This gives them far fewer parameters, built-in translation invariance, and the ability to learn a hierarchy of features — edges in early layers, shapes and textures in deeper layers, and full object parts by the end.
+
+## Purpose of convolution and pooling layers
+
+- **Convolution layer**: applies learnable filters (kernels) that slide over the image and compute a dot product at each position, producing a feature map that highlights where a particular pattern (edge, curve, texture) appears.
+- **Pooling layer**: downsamples feature maps (e.g. max pooling takes the strongest activation in each small region), reducing spatial size and computation while keeping the most important signal and adding some robustness to small shifts in the image.
+
+## Model architecture
+
+```
+Input (28x28x1)
+ → Conv2D (32 filters, 3x3, ReLU)
+ → MaxPooling2D (2x2)
+ → Conv2D (64 filters, 3x3, ReLU)
+ → MaxPooling2D (2x2)
+ → Flatten
+ → Dense (128, ReLU)
+ → Dense (10, Softmax)
+```
+
+Compiled with:
+- Optimizer: Adam
+- Loss: Sparse categorical crossentropy
+- Metric: Accuracy
+- Trained for 10 epochs, batch size 32, with a 20% validation split
+
+## Results
+
+*(Fill in with your actual numbers after running `fashion_mnist_classifier.py`)*
+
+- **Training accuracy**: `__.__%`
+- **Test accuracy**: `__.__%`
+- **Test loss**: `__.__`
+
+**Training vs validation accuracy/loss:**
+
+![Accuracy and loss curves](mp_accuracy_loss_curves.png)
+
+**Confusion matrix:**
+
+![Confusion matrix](mp_confusion_matrix.png)
+
+**Correctly classified samples:**
+
+![Correct predictions](mp_correct_predictions.png)
+
+**Incorrectly classified samples:**
+
+![Incorrect predictions](mp_incorrect_predictions.png)
+
+## Challenges faced
+
+*(Fill in based on what you actually ran into — a few from today's session to start from:)*
+
+- TensorFlow has no wheels for Python 3.14 yet, so the `.venv` had to be pinned to Python 3.12 with `uv venv --python 3.12`.
+- An empty `Practice2_CNN.py` file caused a silent no-op run — fixed by re-saving the script and using `python -u` to force unbuffered output for visibility during training.
+
+## Links
+
+- **GitHub repository**: `<add link>`
+- **Streamlit app / Hugging Face Space**: `<add link>`
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
