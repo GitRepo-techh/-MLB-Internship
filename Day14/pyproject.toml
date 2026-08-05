@@ -1,0 +1,15 @@
+[project]
+name = "day14"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "importlib-resources>=7.1.0",
+    "matplotlib>=3.11.1",
+    "numpy>=2.5.1",
+    "pillow>=12.3.0",
+    "streamlit>=1.61.0",
+    "tensorflow>=2.21.0",
+    "tensorflow-datasets>=4.9.10",
+]
