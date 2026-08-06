@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# YOLO model weights (auto-downloaded, don't need to be in git)
+*.pt
+*.onnx
+*.engine
+
+# Datasets (large, downloadable from source instead of committing)
+Day15/Drone-detection-4/
+*.zip
+
+# Streamlit / temp outputs generated at runtime
+temp_output.jpg
+temp_output_video.mp4
+*.mp4
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Generated output images
+Day15/drone_output_*.jpg
+Day15/my_output_*.jpg
+Day15/output_single.jpg
+
+# Test input images
+Day15/image_*.png
