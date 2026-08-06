@@ -867,5 +867,63 @@ Compiled with:
 
 - **GitHub repository**: `<add link>`
 - **Streamlit app / Hugging Face Space**: `<add link>`
+
+
+
+# Day 15 — Introduction to Object Detection (YOLO)
+
+## What is Object Detection?
+
+Object detection is a computer vision task that identifies **what** objects are present in an image and **where** they are located. Unlike simpler vision tasks, it doesn't just describe the image as a whole — it draws a bounding box around each object instance and assigns it a class label along with a confidence score (how sure the model is about that prediction).
+
+## How is it different from Image Classification?
+
+Image classification predicts a single label for an entire image (e.g. "this image contains a dog"). Object detection goes further — it can find **multiple** objects in a single image, tell you exactly where each one is (via a bounding box), and label each one independently. So a single photo could return "2 persons, 1 car, 1 dog" instead of just one label for the whole frame.
+
+## What is YOLO?
+
+YOLO (You Only Look Once) is a family of object detection models that process an entire image in a single forward pass through a neural network, predicting all bounding boxes, class labels, and confidence scores at once. This is what makes YOLO fast enough for real-time detection (video, webcam feeds), unlike older approaches that scanned an image region-by-region. For this task, the pretrained **YOLOv8n** model (Ultralytics) was used, trained on the COCO dataset (80 everyday object classes).
+
+## Dataset Used
+
+**Drone Detection Computer Vision Model** (Roboflow Universe)
+- 312 images
+- 3 classes: `Bird`, `Drone`, `Plane`
+- Downloaded in YOLO format (train/valid/test splits with images + YOLO-format label files)
+
+Link: https://universe.roboflow.com/drone-detection-i4yej/drone-detection-lzvig
+
+## What objects were detected?
+
+Since the pretrained YOLOv8n model was trained only on COCO's 80 classes, and **"Drone" is not one of them**, the model could not directly recognize drones as their own class. Running inference on 10 sample test images produced the following pattern:
+
+| Outcome | Frequency |
+|---|---|
+| Detected but mislabeled as **airplane** | 2 images |
+| Detected but mislabeled as other COCO classes (person, bird, frisbee, train) | 3 images |
+| No detection at all | 4 images |
+| Multiple unrelated objects detected in a busy scene | 1 image |
+
+## Observations
+
+The pretrained YOLOv8n model was able to correctly **localize** several drones (i.e. draw a bounding box roughly around the object) but consistently **mislabeled** them — most often as "airplane," since drones and airplanes share a broadly similar silhouette (elongated body, protruding arms/wings) from a distance. Some drones, particularly smaller or more distant ones, went undetected entirely — likely because their visual features didn't cross the model's confidence threshold for any of its known classes.
+
+This is a clear demonstration of a core limitation of off-the-shelf pretrained models: general object *localization* ability transfers well to new domains, but class-specific *recognition* does not. The model can tell "something is there" but doesn't know its name unless it was trained on that exact class. This is the direct motivation for fine-tuning / custom training (covered in the next session), where the same pretrained COCO weights would be used as a starting point and further trained on the labeled drone dataset so the model learns to recognize "Drone" as its own class.
+
+## Deliverables
+
+- `practice1.py` — YOLOv8 basic inference practice (single image + multiple images)
+- `practice2.py` — Inference on custom/own images
+- `run_inference.py` — Inference on the drone dataset test images
+- `download_dataset.py` — Roboflow dataset download script
+- `app.py` — Streamlit app for image/video upload, detection, and result download
+- `Drone-detection-4/` — Dataset (train/valid/test, YOLO format)
+- `drone_output_*.jpg` — Sample output images with detections
+- `output_single.jpg`, `output_0.jpg`, `output_1.jpg` — Practice outputs
+
+## Submission
+
+1. GitHub repo link: _add link here_
+2. Streamlit app: run locally via `uv run streamlit run app.py`
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
