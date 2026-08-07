@@ -925,5 +925,94 @@ This is a clear demonstration of a core limitation of off-the-shelf pretrained m
 
 1. GitHub repo link: _add link here_
 2. Streamlit app: run locally via `uv run streamlit run app.py`
+
+
+
+# Image Processing Toolkit
+
+A menu-driven image processing toolkit built with **Python** and **OpenCV**, available in two versions:
+
+- `image_toolkit.py` — a console/terminal menu-driven app
+- `app.py` + `image_ops.py` — a Streamlit web app version
+
+Both support: loading an image, grayscale conversion, resize, rotate, flip, crop, drawing shapes, adding text, saving/downloading the result, plus bonus features (brightness/contrast adjustment, BGR vs RGB comparison, and side-by-side original vs processed display).
+
+---
+
+## BGR vs RGB
+
+Most people think of colors in **RGB** order — Red, Green, Blue. OpenCV does it backwards and uses **BGR** — Blue, Green, Red.
+
+Same pixel data, different order. If you display it with the wrong order in mind, the colors come out swapped (usually red and blue look flipped).
+
+This shows up a few times in the project:
+
+- OpenCV itself (reading, saving, drawing, `cv2.imshow()`) always uses BGR.
+- Streamlit's `st.image()` expects RGB, so images need converting with `cv2.cvtColor(image, cv2.COLOR_BGR2RGB)` before display.
+- Streamlit's color picker gives colors in RGB, so they need reordering into `(B, G, R)` before OpenCV can draw with them correctly.
+
+The bonus feature shows both versions of the same image side by side so the difference is easy to see.
+
+---
+
+## What are grayscale images, and why use them?
+
+A color image has 3 channels (Blue, Green, Red) per pixel. A **grayscale** image has just 1 — a single brightness value from 0 (black) to 255 (white), with no color at all.
+
+Why use it:
+
+- **Faster to process** — one channel instead of three.
+- **Color isn't always needed** — things like edge detection or face detection usually just care about shapes and brightness, not color.
+- **Cleaner for some tasks** — removing color can make edges and patterns easier to pick out.
+
+In `image_ops.py`, `to_grayscale()` first converts with `cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)`, then converts it back to a 3-channel image with `COLOR_GRAY2BGR`. It still looks grayscale, but this keeps the array shape consistent so drawing, adding text, or saving still work fine afterward.
+
+---
+
+## OpenCV functions used
+
+| Function | Purpose |
+|---|---|
+| `cv2.imread()` | Load an image from disk (as color or grayscale) |
+| `cv2.imwrite()` | Save an image to disk |
+| `cv2.imencode()` | Encode an image to bytes in memory (used for Streamlit's download button, instead of writing to disk first) |
+| `cv2.imdecode()` | Decode raw bytes (e.g. an uploaded file) back into an OpenCV image |
+| `cv2.cvtColor()` | Convert between color spaces (BGR ↔ RGB, BGR ↔ Grayscale) |
+| `cv2.resize()` | Resize an image, either to exact dimensions or by a scale factor (`fx`, `fy`) |
+| `cv2.rotate()` | Fast 90°/180°/270° rotation |
+| `cv2.getRotationMatrix2D()` + `cv2.warpAffine()` | Rotate by an arbitrary angle |
+| `cv2.flip()` | Flip horizontally, vertically, or both |
+| NumPy slicing (`image[y1:y2, x1:x2]`) | Crop to a region of interest (OpenCV has no dedicated crop function — cropping is just array slicing) |
+| `cv2.rectangle()`, `cv2.line()`, `cv2.circle()`, `cv2.polylines()` | Draw shapes with customizable color and thickness |
+| `cv2.putText()` | Add custom text with a chosen font, size, color, and thickness |
+| `cv2.convertScaleAbs()` | Adjust brightness/contrast (`alpha` scales for contrast, `beta` shifts for brightness), with built-in clipping to the valid 0–255 range |
+| `cv2.imshow()`, `cv2.waitKey()`, `cv2.destroyAllWindows()` | Display images and manage window lifecycle (console version only) |
+| `np.hstack()` | Stack two images side by side for comparison views |
+
+---
+
+## Challenges faced and how they were solved
+
+**1. Grayscale broke other operations.**
+A grayscale image has only 1 channel, but drawing and saving expected 3. Fixed by converting it back to a 3-channel image right after graying it out, so it still looks grayscale but works with everything else.
+
+**2. Crop coordinates going out of range.**
+Typing in coordinates that were too big, or in the wrong order, gave an empty or broken crop. Fixed by clamping all values to the image's actual size and sorting them before slicing.
+
+**3. Colors looking wrong in Streamlit.**
+OpenCV uses BGR, but Streamlit's image display and color picker both use RGB — so colors would show up swapped. Fixed by converting to RGB before displaying, and converting picked colors back to BGR before drawing with them.
+
+**4. Streamlit app not opening.**
+Running `uv run app.py` just executed the file as plain Python instead of starting the app. Fixed by running it the right way: `uv run streamlit run app.py`.
+
+**5. Saving without a file extension.**
+`cv2.imwrite()` needs a file extension (like `.png`) to know what format to save in — a name like `New_image` with no extension caused an error. Fixed by always including one when saving.
+
+**6. Keeping undo simple.**
+Every processing function returns a brand new image instead of editing the original in place. That way each step can be stored separately, making undo easy to add later without extra rework.
+
+
+
+
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
