@@ -1,11 +1,12 @@
 [project]
 name = "day17"
 version = "0.1.0"
-description = "Add your description here"
+description = "Day 17 OpenCV Image Processing and Document Enhancement"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "numpy>=2.5.2",
-    "opencv-python>=5.0.0.93",
-    "streamlit>=1.61.1",
+    "numpy>=2.0",
+    "opencv-python-headless>=4.10",
+    "streamlit>=1.40",
+    "pillow>=10.0",
 ]
