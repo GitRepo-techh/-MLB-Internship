@@ -1012,7 +1012,504 @@ Running `uv run app.py` just executed the file as plain Python instead of starti
 Every processing function returns a brand new image instead of editing the original in place. That way each step can be stored separately, making undo easy to add later without extra rework.
 
 
+# Day 17 — Image Processing & Document Enhancement
 
+
+Most of the tasks logic is implemented in the code itself.
+
+## What is Image Processing?
+
+Image processing is the process of using computer algorithms to modify, analyze, or enhance digital images. In this project, **Python**, **OpenCV**, and **NumPy** are used to perform common image transformations and enhancement operations.
+
+The project focuses on two main areas:
+
+- Learning fundamental OpenCV transformations and filters.
+- Building a **Document Image Enhancement Tool** that automatically improves the quality of document images.
+
+A **Streamlit app** was also created to make the image-processing operations interactive through a web interface.
+
+---
+
+# Image Transformations
+
+The coding practice section implements the following transformations:
+
+## 1. Translation
+
+Translation moves an image horizontally and vertically.
+
+The transformation is performed using an affine transformation matrix:
+
+```python
+matrix = np.float32([
+    [1, 0, tx],
+    [0, 1, ty]
+])
+
+and applied using:
+
+cv2.warpAffine()
+
+The values tx and ty determine how far the image is moved along the x and y axes.
+
+Purpose
+
+Translation is useful for repositioning an image without changing its size, rotation, or shape.
+
+2. Rotation
+
+Rotation changes the orientation of an image around a selected center point.
+
+The project uses:
+
+cv2.getRotationMatrix2D()
+
+followed by:
+
+cv2.warpAffine()
+
+The rotation function demonstrates a 45-degree rotation.
+
+Purpose
+
+Rotation is useful for correcting images that are tilted or changing the orientation of an image.
+
+3. Scaling
+
+Scaling changes the size of an image.
+
+The project uses:
+
+cv2.resize()
+
+Two scaling operations are demonstrated:
+
+Scaling an image up.
+Scaling an image down.
+
+Different interpolation methods are used depending on the direction of the scaling.
+
+Purpose
+
+Scaling is useful for resizing images while maintaining their visual content.
+
+4. Affine Transformation
+
+Affine transformation maps three points from an original image to three new points.
+
+The project uses:
+
+cv2.getAffineTransform()
+
+and:
+
+cv2.warpAffine()
+Purpose
+
+Affine transformation can be used to translate, rotate, scale, and shear an image while preserving straight lines.
+
+5. Perspective Transformation
+
+Perspective transformation maps four points from an original image to four points in a destination image.
+
+The project uses:
+
+cv2.getPerspectiveTransform()
+
+and:
+
+cv2.warpPerspective()
+Purpose
+
+Perspective transformation is especially useful for correcting photographs of documents taken from an angle.
+
+It changes the geometry of the image so that a tilted document can be transformed into a rectangular, front-facing document.
+
+Image Enhancement Techniques
+
+The main project is a Document Image Enhancement Tool.
+
+The processing pipeline is:
+
+Input Document
+      ↓
+Document Contour Detection
+      ↓
+Perspective Correction
+      ↓
+Grayscale Conversion
+      ↓
+Noise Reduction
+      ↓
+Brightness & Contrast Adjustment
+      ↓
+Sharpening
+      ↓
+Enhanced Document
+
+Each step has a specific purpose.
+
+Document Contour Detection
+
+The application attempts to automatically find the document in the image.
+
+The image is first converted to grayscale and blurred:
+
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+
+Canny edge detection is then applied:
+
+edged = cv2.Canny(blurred, 50, 150)
+
+Contours are detected and the program searches for a large four-sided contour.
+
+Purpose
+
+The purpose of contour detection is to automatically find the four corners of a document so that perspective correction can be performed without manually selecting the points.
+
+Perspective Correction
+
+Once a four-point document contour is detected, the points are ordered as:
+
+Top Left
+Top Right
+Bottom Right
+Bottom Left
+
+The points are then mapped to a rectangular output using:
+
+cv2.getPerspectiveTransform()
+
+and:
+
+cv2.warpPerspective()
+Purpose
+
+Perspective correction straightens a tilted document and makes it appear more like a scanned page.
+
+This was the enhancement step that produced the biggest visual improvement on tilted documents because it corrects the overall geometry of the page before the other enhancement techniques are applied.
+
+Grayscale Conversion
+
+The perspective-corrected image is converted to grayscale using:
+
+cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+Purpose
+
+Grayscale removes color information and reduces the image to a single brightness channel.
+
+For document images, color is usually less important than the contrast between the text and the background.
+
+Grayscale also makes later processing simpler and faster.
+
+Noise Reduction
+
+The document enhancement pipeline uses a bilateral filter:
+
+cv2.bilateralFilter(
+    img,
+    d=9,
+    sigmaColor=75,
+    sigmaSpace=75
+)
+Purpose
+
+Noise reduction removes unwanted small variations and artifacts from the image.
+
+A bilateral filter was selected because it reduces noise while preserving important edges such as text boundaries.
+
+Brightness Enhancement
+
+Brightness and contrast are adjusted using:
+
+cv2.convertScaleAbs(
+    img,
+    alpha=1.3,
+    beta=15
+)
+
+Here:
+
+alpha controls contrast.
+beta controls brightness.
+Purpose
+
+Brightness adjustment helps improve documents that are too dark or have uneven lighting.
+
+Contrast Enhancement
+
+The same cv2.convertScaleAbs() operation is used to increase the contrast of the document.
+
+cv2.convertScaleAbs(
+    img,
+    alpha=1.3,
+    beta=15
+)
+Purpose
+
+Increasing contrast makes the difference between the document background and the text more noticeable.
+
+This can improve readability, especially when the original photograph is low contrast.
+
+Sharpening
+
+The final image is sharpened using a convolution kernel:
+
+kernel = np.array([
+    [0, -1, 0],
+    [-1, 5, -1],
+    [0, -1, 0]
+])
+
+sharpened = cv2.filter2D(img, -1, kernel)
+Purpose
+
+Sharpening makes edges more defined.
+
+For document images, this can make letters and other small details appear clearer after resizing, filtering, and perspective correction.
+
+Blurring Techniques
+
+The coding practice section also implements three different blur techniques.
+
+Gaussian Blur
+cv2.GaussianBlur()
+
+Gaussian blur smooths an image and reduces high-frequency noise.
+
+It can also be useful as a preprocessing step before edge detection.
+
+Median Blur
+cv2.medianBlur()
+
+Median blur replaces pixels with the median value of their surrounding neighborhood.
+
+It is useful for reducing certain types of noise while preserving edges reasonably well.
+
+Bilateral Filter
+cv2.bilateralFilter()
+
+Bilateral filtering smooths an image while preserving edges.
+
+This is particularly useful for document enhancement because text edges should remain visible while unwanted noise is reduced.
+
+Brightness and Contrast
+
+The project demonstrates both increasing and decreasing brightness and contrast.
+
+Brightness is controlled using the beta parameter:
+
+cv2.convertScaleAbs(image, alpha=1.0, beta=50)
+
+Contrast is controlled using the alpha parameter:
+
+cv2.convertScaleAbs(image, alpha=1.5, beta=0)
+
+In general:
+
+alpha > 1 → higher contrast
+alpha < 1 → lower contrast
+beta > 0 → brighter image
+beta < 0 → darker image
+OpenCV Functions Used
+Function	Purpose
+cv2.imread()	Loads an image from disk
+cv2.imwrite()	Saves an image to disk
+cv2.cvtColor()	Converts between color spaces such as BGR and grayscale
+cv2.resize()	Resizes an image
+cv2.getRotationMatrix2D()	Creates a rotation matrix
+cv2.warpAffine()	Applies an affine transformation
+cv2.getAffineTransform()	Creates an affine transformation matrix from three point pairs
+cv2.getPerspectiveTransform()	Creates a perspective transformation matrix from four point pairs
+cv2.warpPerspective()	Applies a perspective transformation
+cv2.GaussianBlur()	Applies Gaussian blur
+cv2.medianBlur()	Applies median blur
+cv2.bilateralFilter()	Reduces noise while preserving edges
+cv2.Canny()	Detects edges
+cv2.findContours()	Finds contours in an image
+cv2.contourArea()	Calculates the area of a contour
+cv2.approxPolyDP()	Approximates a contour with fewer points
+cv2.convertScaleAbs()	Adjusts brightness and contrast
+cv2.filter2D()	Applies a custom convolution filter
+np.float32()	Creates NumPy arrays with the required floating-point type
+np.hstack()	Combines images horizontally for comparison
+Challenge Task — Five Tilted Documents
+
+The mandatory challenge requires five tilted document images to be processed using the document enhancement tool.
+
+For each document, the application saves:
+
+Original image
+Perspective-corrected image
+Final enhanced image
+Side-by-side comparison image
+
+The comparison image makes it easier to see how the document changes throughout the processing pipeline.
+
+The five challenge images are:
+
+image1.jpg
+image2.jpg
+image3.jpg
+image4.jpg
+image5.jpg
+
+The challenge demonstrates that the same document enhancement pipeline can be applied to multiple tilted documents.
+
+Which Transformation Had the Biggest Impact?
+
+The perspective transformation had the biggest impact on document quality, especially for the tilted document challenge.
+
+A document photographed from an angle does not appear as a normal rectangle. Its corners and edges are distorted because of the camera's perspective.
+
+Perspective correction fixes this geometry by mapping the detected four document corners to a rectangular output.
+
+This produced the most noticeable improvement because it changed the overall shape and orientation of the document.
+
+The other enhancement techniques then improved the corrected image further:
+
+Perspective Correction
+        ↓
+Grayscale
+        ↓
+Noise Reduction
+        ↓
+Brightness / Contrast
+        ↓
+Sharpening
+
+Therefore, perspective correction had the biggest visual impact, while the complete pipeline produced the best final result.
+
+Challenges Faced and How They Were Solved
+
+1. Automatically detecting the document.
+
+Finding the document boundary automatically was one of the main challenges. The program uses Canny edge detection followed by contour detection and searches for a large four-sided contour. If no suitable contour is found, the program falls back to using the original image instead of failing.
+
+2. Ordering the document corners correctly.
+
+Perspective transformation requires the four corners to be in the correct order. A custom order_points() function was implemented to arrange the points as top-left, top-right, bottom-right, and bottom-left before applying the transformation.
+
+3. Handling tilted documents.
+
+A tilted document can have significantly different corner positions depending on the camera angle. The automatic contour detection and perspective transformation were combined to handle these cases without manually entering the corner coordinates.
+
+4. Grayscale images having one channel.
+
+The original images are normally three-channel BGR images, while grayscale images contain only one channel. This caused an issue when creating side-by-side comparison images. A helper function was used to convert grayscale images into three-channel images before combining them.
+
+5. Handling file paths.
+
+The project contains folders with spaces such as Input images, Output images, and Mini Project. Relative paths and os.path.join() were used to make file handling more reliable.
+
+6. Processing multiple image formats.
+
+The program supports common image formats including .jpg, .jpeg, and .png. The input directory is scanned and only supported image files are processed.
+
+7. Converting the OpenCV project into a Streamlit application.
+
+The original practice programs used cv2.imshow(), cv2.waitKey(), and terminal input. These are not suitable for a browser-based interface, so the Streamlit version uses file uploaders, buttons, sliders, image previews, and download buttons instead.
+
+8. Running Streamlit correctly.
+
+Running:
+
+uv run app.py
+
+only executes the Python file normally. The Streamlit application must instead be started with:
+
+uv run streamlit run app.py
+Streamlit Application
+
+A Streamlit web application was created to provide an interactive interface for the image-processing operations.
+
+The application allows the user to upload an image and select different operations.
+
+Available operations include:
+
+Document Enhancement
+Translation
+Rotation
+Scaling
+Affine Transformation
+Perspective Transformation
+Brightness Adjustment
+Contrast Adjustment
+Gaussian Blur
+Median Blur
+Bilateral Filter
+Sharpening
+
+The processed image can be viewed directly in the browser and downloaded after processing.
+
+Deliverables
+Mini_Project.py — Document image enhancement tool and challenge task
+app.py — Streamlit application for interactive image processing
+practice.py — OpenCV coding practice for transformations and enhancement techniques
+Input images/ — Input image dataset
+Output images/ — Enhanced and processed output images
+challenge_task/ — Challenge outputs containing original, corrected, enhanced, and comparison images
+README.md — Project documentation
+pyproject.toml — Project dependencies and configuration
+Technologies Used
+Python
+OpenCV
+NumPy
+Streamlit
+Running the Project
+Run the Python Document Enhancement Tool
+
+From the project directory:
+
+uv run python Mini_Project.py
+
+The program loads the images, processes them, and saves the enhanced results.
+
+Run the Streamlit Application
+
+Start the web application with:
+
+uv run streamlit run app.py
+
+The application can then be opened in a web browser.
+
+Project Structure
+Day17/
+│
+├── Input images/
+│   ├── image1.jpg
+│   ├── image2.jpg
+│   ├── image3.jpg
+│   ├── image4.jpg
+│   ├── image5.jpg
+│   ├── image6.jpg
+│   ├── image7.jpg
+│   ├── image8.jpg
+│   ├── image9.jpg
+│   └── image10.jpg
+│
+├── Output images/
+│
+├── Mini Project/
+│   └── Images/
+│       ├── Mini_Project.py
+│       ├── image1.jpg
+│       ├── image2.jpg
+│       ├── image3.jpg
+│       ├── image4.jpg
+│       ├── image5.jpg
+│       └── challenge_task/
+│
+├── app.py
+├── practice.py
+├── pyproject.toml
+└── README.md
+Submission
+GitHub repo link: add link here
+Streamlit app: run locally via uv run streamlit run app.py
+Document enhancement tool: Mini_Project.py
+Five tilted document challenge outputs: challenge_task/
 
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
