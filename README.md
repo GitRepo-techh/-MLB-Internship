@@ -1511,5 +1511,46 @@ Streamlit app: run locally via uv run streamlit run app.py
 Document enhancement tool: Mini_Project.py
 Five tilted document challenge outputs: challenge_task/
 
+# Day 18 — Edge Detection, Morphology & Document Boundary Detection
+
+## 1. Sobel vs Laplacian vs Canny
+
+| Method | How it works | Characteristics |
+|---|---|---|
+| **Sobel** | 1st-order derivative; separate Gx/Gy kernels combined into gradient magnitude | Directional, somewhat noise-resistant (built-in smoothing), produces thick edges |
+| **Laplacian** | 2nd-order derivative; single isotropic kernel, detects zero-crossings | Direction-independent, very noise-sensitive, tends to produce double edges |
+| **Canny** | Multi-stage pipeline: Gaussian blur → Sobel gradients → non-max suppression → double-threshold hysteresis | Thin, clean, well-connected single-pixel edges — most robust of the three, used for the boundary detection tool |
+
+## 2. Morphological Operations — Purpose
+
+- **Erosion**: shrinks white regions, removes small noise, thins objects
+- **Dilation**: grows white regions, fills small gaps, thickens objects
+- **Opening** (erode→dilate): removes small noise while preserving overall object size
+- **Closing** (dilate→erode): fills small holes/gaps, bridges broken edges — critical for turning a broken Canny outline into one continuous boundary
+- **Morphological Gradient** (dilate−erode): extracts object outline/edge from a binary shape
+- **Top Hat** (original−opening): highlights small bright details on a dark background
+- **Black Hat** (closing−original): highlights small dark details on a light background
+
+## 3. Best-Performing Combination
+
+**Pipeline**: Grayscale → Gaussian Blur `(15,15)` → Canny `(30, 100)` → Morphological Closing `(9,9)`, 2 iterations → contour filtering (area + solidity + 4-point approximation) → draw boundary.
+
+**Parameters tuned and why:**
+- **Gaussian blur kernel**: started at `(5,5)`, increased to `(15,15)`. Small kernels left fine text edges intact, which Canny then falsely detected as strong edges, competing with the real document boundary during contour selection.
+- **Canny thresholds**: started at `(50,150)`, loosened to `(30,100)`. Lower thresholds were needed after heavier blurring reduced the boundary's edge contrast, so weaker gradients along the true edge still get picked up.
+- **Closing kernel**: increased from `(5,5)` to `(9,9)`, 2 iterations, to bridge gaps in the boundary caused by shadows/low contrast without over-merging unrelated regions.
+- **Contour selection logic**: rather than blindly taking the largest contour, added an **area filter** (discard anything under ~10% of image area), a **solidity filter** (`area / convex_hull_area > 0.85`, to reject jagged text blobs that pass the area check but aren't shape-like a document), and a **4-point `approxPolyDP`** check (epsilon = `0.02 × perimeter`) to isolate a clean quadrilateral.
+- Also tried: bilateral filtering (didn't help — it preserves high-contrast text edges by design) and a large morphological closing directly on grayscale to erase text before edge detection (helped a few images but oversized/undersized inconsistently due to varying text scale across photos — informed the resize-normalization step).
+- **Resize normalization**: added a fixed-width resize (`800px`) on load so kernel sizes behave consistently across images with different original resolutions/zoom levels.
+
+## 4. Challenges Faced
+
+- **Text vs. boundary confusion**: dense receipt text produces strong, high-contrast edges that Canny detects just as readily as the actual document boundary. On several images, `findContours` picked the largest connected *text blob* instead of the receipt outline, even after area and shape filtering.
+- **Low contrast backgrounds**: images with the receipt against light-colored or busy backgrounds (siding, tray, table) had a genuinely faint boundary edge, making it hard for Canny to capture a continuous outline even after tuning.
+- **Scale inconsistency across the dataset**: images varied significantly in resolution and zoom, so a single fixed kernel size didn't generalize — a kernel that removed text in one image was too small (or too large) in another.
+- **Steep tilt / partial frame**: a few images (folded receipts, steep camera angles, receipt edges nearly parallel to the camera) pushed past what a classical Canny + contour pipeline can reliably solve without a trained segmentation model — these are documented as known limitations rather than forced to a false positive.
+
+Out of 15 test images, the tuned pipeline correctly detects the document boundary on the majority; the remaining failures are consistent with the challenges above (dense text merging, low contrast, extreme tilt).
+
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
