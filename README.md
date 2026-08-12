@@ -1552,5 +1552,77 @@ Five tilted document challenge outputs: challenge_task/
 
 Out of 15 test images, the tuned pipeline correctly detects the document boundary on the majority; the remaining failures are consistent with the challenges above (dense text merging, low contrast, extreme tilt).
 
+# Day 19 — Contours in OpenCV & Shape Detection System
+
+## Overview
+
+Today's focus was moving from pixel-level image processing (Days 16–18) into **structural** image analysis — finding, measuring, and classifying the actual objects inside an image using contours. The deliverable is a full Shape Detection System that can load an image, detect every shape present, label it, and report its geometric properties.
+
+## What Are Contours?
+
+A contour is a curve joining all continuous points along a boundary that share the same intensity — in practice, it's the outline of an object. OpenCV finds contours by tracing the border between foreground and background regions in a **binary** (black-and-white only) image. It has no understanding of what a shape "is" — it's a purely topological trace of where pixel values change from one region to another, which is why every contour pipeline starts by converting the image into a clean binary map first (via thresholding or edge detection) before any shape can be found at all.
+
+## How Contour Detection Works
+
+The pipeline follows a fixed order, where each step depends on the one before it:
+
+1. **Convert to binary** — `cv2.threshold()` (or Canny edge detection) collapses the image down to pure black/white, since contour tracing can't work on ambiguous grayscale values.
+2. **Find contours** — `cv2.findContours()` walks the binary image and returns every closed boundary it finds as a list of points.
+3. **Filter noise** — small stray contours (JPEG artifacts, thresholding noise) get discarded by area, since `findContours` returns everything, significant or not, with no judgment of its own.
+4. **Measure each contour**:
+   - `cv2.contourArea()` — enclosed area (Shoelace formula)
+   - `cv2.arcLength()` — perimeter, by summing the distance between every consecutive boundary point
+   - `cv2.boundingRect()` — smallest upright rectangle containing the shape
+   - `cv2.minEnclosingCircle()` — smallest circle containing the shape
+5. **Approximate the shape** — `cv2.approxPolyDP()` reduces a noisy, many-point contour down to just its corner points, which is what makes vertex-counting possible.
+6. **Classify** — vertex count, aspect ratio (for square vs. rectangle), and circularity (`4π·Area / Perimeter²`, which is 1.0 for a perfect circle) together determine the shape label.
+7. **Draw & save** — contour outline, bounding rect, label, and area/perimeter text get drawn onto the output image, which is then written to disk.
+
+## Shapes the Program Can Detect
+
+- Triangle
+- Square
+- Rectangle
+- Pentagon
+- Hexagon
+- Heptagon
+- Octagon
+- Nonagon
+- Circle
+- Polygon (fallback for anything else with more vertices)
+
+Classification is purely geometric — no machine learning involved. Vertex count from `approxPolyDP` picks the base category, aspect ratio disambiguates square from rectangle, and circularity catches genuinely round shapes that would otherwise get approximated into a high-vertex polygon.
+
+## Project Structure
+
+```
+Day-19/
+├── contour_practice.py    # Core contour detection & measurement script
+├── main.py                 # Shape Detection System (full pipeline + classifier)
+├── Input images/            # 13 test images (colored fills, outlines, multiple polygon types)
+├── Output images/            # original / contours / final-labeled trio per input image
+├── pyproject.toml / uv.lock  # dependency management via uv
+└── README.md
+```
+
+## How to Run
+
+```bash
+uv run main.py
+```
+
+Processes every image in `Input images/` and saves three outputs per image into `Output images/`:
+`<name>_original.jpg`, `<name>_contours.jpg`, `<name>_final.jpg`.
+
+## Challenges Faced
+
+**Grayscale conversion hides colors unevenly.** OpenCV's grayscale conversion uses a luminance-weighted formula (`0.299R + 0.587G + 0.114B`), which meant on colored shapes against a black background, yellow came through bright enough to threshold cleanly, but blue and red barely registered at all — they were nearly as dark as the background itself. The result: only part of a multi-colored image (e.g. one quadrant of a ring split into red/green/blue/yellow segments) was ever detected. Fixed by thresholding on the **max value across B, G, R channels** instead of the weighted grayscale average, so any channel being "lit up" counts as foreground regardless of hue.
+
+**One threshold strategy doesn't fit the whole dataset.** The dataset mixes filled colored shapes on black backgrounds with plain black-outline shapes on white backgrounds — these need opposite thresholding logic (bright-foreground vs. dark-foreground). A single fixed `THRESH_BINARY` call misclassified outlined shapes entirely: the thin outline became a "hole" inside a solid white region, `RETR_EXTERNAL` ignored the interior boundary, and the contour that survived was the outer edge of the whole white canvas — a 4-sided shape that got labeled "Rectangle" no matter what was actually drawn. Fixed by sampling the image's corner pixels to estimate background brightness first, then branching between inverted and non-inverted thresholding depending on whether the background is light or dark.
+
+**Polygon vertex approximation is epsilon-sensitive.** Higher-vertex shapes (heptagon, hexagon, nonagon) are the most fragile to classify correctly — if `approxPolyDP`'s epsilon is too aggressive relative to the shape's perimeter, adjacent vertices merge and the vertex count drops, misclassifying (e.g.) a heptagon as a hexagon. Kept epsilon proportional to perimeter (`0.02 × arcLength`) rather than a fixed pixel value, so it scales correctly across differently-sized shapes.
+
+**Circle vs. many-sided polygon ambiguity.** A circle approximated by `approxPolyDP` at low epsilon can land anywhere from 8 to 20+ vertices, which would otherwise get misread as "Polygon." Resolved by checking circularity (`4π·Area / Perimeter²`) alongside vertex count — anything sufficiently round gets classified as a circle regardless of how many approximation points it produced.
+
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
