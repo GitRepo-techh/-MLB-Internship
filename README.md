@@ -1624,5 +1624,49 @@ Processes every image in `Input images/` and saves three outputs per image into 
 
 **Circle vs. many-sided polygon ambiguity.** A circle approximated by `approxPolyDP` at low epsilon can land anywhere from 8 to 20+ vertices, which would otherwise get misread as "Polygon." Resolved by checking circularity (`4π·Area / Perimeter²`) alongside vertex count — anything sufficiently round gets classified as a circle regardless of how many approximation points it produced.
 
+# Day 20 - Video Processing with OpenCV
+
+## What this covers
+
+Today was about moving from static images to video - reading video files frame by frame, applying the same processing techniques I've been using (grayscale, blur, edge detection), and saving the result back out as a new video. Also got the webcam pipeline working so the whole thing runs live, not just on pre-recorded footage.
+
+## How OpenCV reads videos
+
+OpenCV doesn't really have a "video" object the way you'd expect - `cv2.VideoCapture()` opens the video frame by frame, and then you pull frames out of it one at a time with `.read()`. Each frame comes back as a regular NumPy array, same as any image I've been processing all internship. So a video is really just a loop that keeps calling `.read()` until it runs out of frames (`ret` turns `False`), and everything I already know about image processing applies per-frame inside that loop.
+
+`.get()` with property flags like `CAP_PROP_FPS`, `CAP_PROP_FRAME_WIDTH/HEIGHT`, and `CAP_PROP_FRAME_COUNT` pulls the video's metadata - these come from the file itself, so I only fetch them once before the loop instead of every frame (learned this the hard way, more on that below).
+
+## What FPS means
+
+FPS (frames per second) is just how many still frames are shown per second to create the illusion of motion. 30 FPS means each frame is technically only on screen for about 33ms. It matters more than I expected once I got to the webcam part - if my processing (blur + Canny) takes too long per frame, my *actual* output FPS drops below what I tell `VideoWriter` it should be, and the saved video ends up looking sped up because there aren't enough frames to fill the time the file claims to run for.
+
+## Processing techniques applied
+
+- **Grayscale conversion** (`cv2.cvtColor`, `COLOR_BGR2GRAY`) - reduces each frame to a single channel before edge detection, since Canny doesn't need color info anyway.
+- **Gaussian Blur** (`cv2.GaussianBlur`) - added this before Canny to cut down noise. Without it my edge output was way too dense/messy, especially on textured footage (rocks/water). I had to tune the kernel size per source - went with `(15,15)` on the recorded video and `(11,11)` on webcam since the webcam feed is already noisier and I didn't want to blur out too much detail on top of that.
+- **Canny Edge Detection** (`cv2.Canny`) - this is the actual output I save. Thresholds also needed tuning per source - `(50, 90)` worked better for the recorded video, `(40, 70)` for webcam. Higher-texture footage (like the rocky river clip) needed higher thresholds or it just picked up every tiny surface crack as an "edge" instead of the actual shapes.
+
+## Challenges/blockers I ran into
+
+**Parameter tuning wasn't one-size-fits-all.** My first pass used the same blur kernel and Canny thresholds across every source, and it looked fine on some clips and completely noisy on others (rocky/textured footage especially - way too many false edges). Had to actually test and adjust per video instead of assuming one config works everywhere.
+
+**Handling the output video was the biggest headache.** A few separate issues stacked up here:
+- I initially had `VideoWriter` getting created *inside* the frame loop instead of before it - meaning it was reinitializing (and overwriting) the output file on every single frame. Output was basically garbage until I moved it outside the loop.
+- Canny output is single-channel, but `VideoWriter` with `isColor=True` expects 3-channel BGR frames. Had to convert back with `cv2.cvtColor(canny, COLOR_GRAY2BGR)` before writing or the write would fail/produce a broken file.
+- Codec/container mismatches - had issues with `mp4v` + `.mp4` not playing back reliably on my setup, ended up switching to `MJPG` + `.avi` which was much more consistent.
+- Frame size passed to `VideoWriter` needs to be `(width, height)` - opposite order from how NumPy reports `frame.shape` (`height, width`). Mixed this up once and the writer silently failed.
+
+**Webcam FPS reporting was unreliable.** `cap.get(CAP_PROP_FPS)` on my webcam didn't return a consistent/trustworthy value the way it does for a video file - something to watch out for since it directly affects the FPS you initialize `VideoWriter` with.
+
+**Forgetting to release resources.** Early on I wasn't calling `.release()` on the writer, which meant the output file's container never finalized properly and wouldn't open afterward even though the script "ran successfully."
+
+## Files in this folder
+
+- Video processing script (recorded video input)
+- Webcam processing script
+- Input video(s)
+- Processed output video(s)
+- This README
+
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
