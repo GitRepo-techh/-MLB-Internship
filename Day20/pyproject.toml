@@ -3,8 +3,8 @@ name = "day20"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.14"
 dependencies = [
-    "opencv-python-headless>=4.13.0,<5.0.0",
     "streamlit>=1.61.1",
+    "opencv-python-headless>=4.13.0,<5.0.0",
 ]
