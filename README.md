@@ -1667,6 +1667,49 @@ FPS (frames per second) is just how many still frames are shown per second to cr
 - Input video(s)
 - Processed output video(s)
 - This README
+## Day 21
+## OpenCV & Streamlit Image Processing Studio
+# What this covers
+Built an interactive web dashboard for computer vision operations using Streamlit and OpenCV. Moved from running isolated Python scripts to building a structured modular architecture: app.py manages UI controls, file uploads, and layout, while image_processing.py executes image manipulation, feature extraction, document warping, color masking, and object detection.
 
+# How Streamlit and OpenCV interact
+Streamlit handles user input (sliders, dropdowns, buttons) and passes uploaded images into OpenCV functions as standard NumPy arrays. Because OpenCV reads and processes images in BGR format while Streamlit expects RGB, color space alignment must be handled before rendering images on screen.
+
+The critical piece in this setup is data contract consistency. Streamlit expects backend functions to return predictable data types — either a single processed image array or structured tuples like (processed_image, count) or (processed_image, mask). Ensuring that backend return signatures match frontend variable assignments is essential to prevent runtime execution errors.
+
+# Processing techniques applied
+Grayscale & Thresholding (cv2.cvtColor, cv2.threshold) — Converted BGR images to single-channel grayscale and applied manual binary thresholding as well as automated Otsu thresholding for image binarization.
+
+# Blurring & Spatial Filters (cv2.GaussianBlur, cv2.medianBlur, cv2.bilateralFilter):
+ — Smooths noise using configurable kernel sizes. Built custom 2D convolution matrix filters (cv2.filter2D, cv2.transform) for image sharpening and Sepia color tone generation.
+
+# Edge & Contour Detection (cv2.Canny, cv2.findContours, cv2.drawContours):
+ — Extracted structural edges and mapped outline contours onto the image while tracking total contour counts.
+
+Geometric Shape Classification (cv2.approxPolyDP, cv2.arcLength) — Computed contour perimeter approximations to classify geometries based on vertex counts (Triangles, Squares, Rectangles, Pentagons, Circles), drawing bounding polygons and labeling shapes on the image.
+
+Document Perspective Scanner (cv2.getPerspectiveTransform, cv2.warpPerspective, cv2.adaptiveThreshold) — Isolated 4-point document quadrilaterals from images, applied perspective warping to straighten skewed documents, and enhanced readability using adaptive Gaussian thresholding.
+
+Color Masking (cv2.inRange, cv2.bitwise_and) — Converted images to HSV color space to isolate specified color bounds (Red, Green, Blue, Yellow) using binary masks.
+
+Face Detection (cv2.CascadeClassifier, Haar Cascades) — Loaded pre-trained Haar Cascade XML classifiers to detect human faces and draw bounding boxes around ROI (Region of Interest) coordinates.
+
+Challenges/blockers I ran into
+Return value unpacking mismatches (ValueError). The primary crash (ValueError: too many values to unpack (expected 2)) occurred because app.py expected backend functions to return tuple pairs like (result, count) or (result, mask), while image_processing.py originally returned only a single NumPy image array. When Python attempts to unpack a 2D/3D image array into two variables, it attempts to split the pixel matrix rows, triggering an unpacking error. Resolved this by updating backend functions to explicitly return output tuples matching the UI expectations.
+
+Contour noise and shape misclassification. Initial shape detection picked up tiny background noise artifacts as small geometric shapes. Added a minimum contour area filter (area < 200) to skip noise, and introduced bounding rectangle aspect ratio checks (w / h) to accurately differentiate squares from rectangles.
+
+Document scanner vertex ordering. Perspective warping with cv2.getPerspectiveTransform failed if document contour vertices were not ordered consistently. Created a helper function (_order_points) to map quadrilateral corners deterministically (top-left, top-right, bottom-right, bottom-left) based on coordinate sums and differences before applying the transform matrix.
+
+Color space alignment between OpenCV and Streamlit. Converting single-channel binary masks or grayscale outputs directly to Streamlit caused display bugs. Ensured all single-channel outputs were converted back to 3-channel BGR/RGB (cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)) before passing them back to the frontend.
+
+Files in this folder
+app.py — Streamlit frontend web application, sidebar controls, and UI rendering logic.
+
+image_processing.py — Computer vision backend functions and operation dispatch dictionary.
+
+.streamlit/config.toml — Theme and color configuration file for native Streamlit UI styling.
+
+README.md — Project documentation and setup guide.
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
