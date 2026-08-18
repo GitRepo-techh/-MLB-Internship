@@ -1711,5 +1711,85 @@ image_processing.py — Computer vision backend functions and operation dispatch
 .streamlit/config.toml — Theme and color configuration file for native Streamlit UI styling.
 
 README.md — Project documentation and setup guide.
+
+# Day 22 — Introduction to OCR
+
+## What is OCR?
+
+Optical Character Recognition (OCR) is the process of converting text that appears inside images (scanned documents, photos, receipts, signboards, etc.) into machine-readable, editable text. It bridges the gap between visual content and structured, searchable data.
+
+At a high level, OCR works in two stages:
+
+1. **Text detection** — locating *where* text exists in an image (bounding boxes around words/lines), conceptually similar to object detection.
+2. **Text recognition** — reading the actual characters/words inside each detected region and converting them into a text string.
+
+Older engines (like Tesseract) rely more on classical pattern matching and character segmentation. Modern engines (EasyOCR, PaddleOCR, DocTR) use deep learning — CNN + RNN/Transformer-based sequence models — which handle varied fonts, rotated text, and messy backgrounds far more reliably.
+
+## OCR Applications
+
+- Document digitization and archiving
+- Invoice and receipt processing
+- ID card / form data extraction
+- License plate recognition
+- Searchable PDF creation
+- Assistive technology (screen readers for the visually impaired)
+
+## Challenges in OCR
+
+- Poor lighting, glare, or shadows on the source image
+- Skewed, rotated, or curved text
+- Low resolution / small font sizes
+- Handwriting, which varies enormously between individuals
+- Complex layouts (tables, multi-column documents)
+- Background noise or cluttered scenes (e.g. signboards, street photos)
+
+## Importance of Preprocessing
+
+OCR recognition models are trained primarily on relatively clean, well-lit text. Any degradation in image quality — noise, poor contrast, skew — reduces recognition accuracy significantly. Preprocessing (grayscale conversion, contrast enhancement, denoising, thresholding) is often the single biggest lever for improving OCR output, frequently more impactful than switching between OCR libraries entirely.
+
+## Multithreading Support Across OCR Libraries
+
+- **Tesseract OCR** has native multithreading support built into its recognition engine, since it's a CPU-bound classical pipeline (configurable via internal thread pools / `OMP_THREAD_LIMIT`).
+- **EasyOCR, PaddleOCR, and DocTR** are deep-learning-based. Rather than CPU multithreading, their performance scaling comes primarily from **GPU batching** (processing multiple images/regions in parallel on a GPU). CPU-side multithreading can still be applied to the surrounding pipeline (e.g. parallelizing image loading and preprocessing across a batch of files) but the core recognition step itself is not multithreaded the way Tesseract's is.
+
+## OCR Libraries Compared
+
+| Library | Strengths | Limitations | Best Used For |
+|---|---|---|---|
+| **Tesseract OCR** | Lightweight, CPU-only, no GPU required, native multithreading, huge language coverage | Weak on natural scene text and handwriting; limited layout analysis | Clean scanned documents, embedded/edge deployments |
+| **EasyOCR** | Very simple Python API, strong on natural scene text (signboards, photos), 80+ languages | Slower on CPU, heavier dependency (PyTorch) | Quick prototyping, mixed-content images |
+| **PaddleOCR** | Best all-round accuracy, built-in layout analysis, table detection, multilingual (esp. Asian scripts) | Heavier framework dependency (PaddlePaddle) | Production document/invoice pipelines |
+| **DocTR** | Purpose-built for document understanding, strong structured layout support | Smaller community, less scene-text focused | Structured document extraction pipelines |
+
+This project uses **EasyOCR**, chosen for its simple API, solid accuracy on mixed content (documents, receipts, signboards), and ease of integration with OpenCV for preprocessing and visualization.
+
+## Preprocessing Techniques Applied
+
+- Grayscale conversion
+- Contrast enhancement (CLAHE / histogram equalization)
+- Confidence-based filtering — detections below **0.75 confidence** are discarded to reduce noisy/garbled output
+
+## Challenges Faced During Extraction
+
+- Handwritten notes and old book-page scans produced noticeably lower confidence scores (often 0.1–0.5) compared to printed text (0.90+)
+- Receipts with small, dense text and currency symbols were harder to segment cleanly
+- Some detections split single words into multiple boxes on lower-quality images
+
+## Project Structure
+
+```
+Day-22/
+├── practice.py            # OCR practice script across 10+ test images
+├── mini_project.py        # Standalone script version (no web framework)
+├── app.py                 # Streamlit deployment version
+├── requirements.txt
+├── input_images/          # Sample input images
+├── output_texts/          # Extracted text files
+├── output_images/         # Annotated images with bounding boxes
+└── README.md
+```
+
+
+
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.

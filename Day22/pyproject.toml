@@ -1,0 +1,11 @@
+[project]
+name = "day22"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+dependencies = [
+    "easyocr>=1.7.2",
+    "opencv-python>=5.0.0.93",
+    "streamlit>=1.61.1",
+]
