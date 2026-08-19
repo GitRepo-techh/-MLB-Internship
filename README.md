@@ -1789,7 +1789,106 @@ Day-22/
 └── README.md
 ```
 
+# Day 23 - Document OCR Web Application
 
+A Streamlit web app that uploads a document/receipt/invoice/form image,
+preprocesses it, extracts the readable text with a choice of OCR engines,
+displays the original image alongside the extracted text, and lets the
+user download the result as a `.txt` file.
+
+## Live App
+
+- **Streamlit URL:** _[add your deployed URL here]_
+- **GitHub Repository:** _[add your repo link here]_
+
+## Project Structure
+
+```
+Day-23/
+├── app.py              # Streamlit UI
+├── ocr_utils.py         # Preprocessing + OCR engine functions
+├── requirements.txt      # Python dependencies
+├── packages.txt          # System package (tesseract binary) for Streamlit Cloud
+├── README.md
+├── sample_inputs/         # 15+ test images (documents, receipts, invoices, forms)
+└── sample_outputs/        # Corresponding extracted .txt results
+```
+
+## OCR Library Used
+
+The app supports four engines, selectable from the sidebar:
+
+| Engine     | Type                       | Notes                                                    |
+|------------|----------------------------|-----------------------------------------------------------|
+| Tesseract  | Classic OCR (pytesseract)  | Lightweight, fast, no GPU. Best on clean, well-scanned text. |
+| EasyOCR    | Deep learning (PyTorch)    | Good on messy/real-world photos, 80+ languages.            |
+| PaddleOCR  | Deep learning (PaddlePaddle) | Strong on structured documents and multi-orientation text. |
+| DocTR      | Deep learning (doc-focused) | Two-stage detection + recognition, document-specific.      |
+
+For this deployment, **Tesseract** and **EasyOCR** are enabled by default in
+`requirements.txt` since they install reliably on Streamlit Cloud. PaddleOCR
+and DocTR are supported in the code (`ocr_utils.py`) but commented out in
+`requirements.txt` because of heavier install size / Python version
+constraints (see Challenges below) - uncomment them if deploying somewhere
+with more build resources.
+
+## Preprocessing Techniques Applied
+
+Implemented in `preprocess_image()` in `ocr_utils.py`, each toggleable from
+the sidebar so results can be compared:
+
+1. **Grayscale conversion** - removes color channels that don't help OCR and
+   speeds up the following steps.
+2. **Denoising** (`cv2.fastNlMeansDenoising`) - reduces scanner/camera noise
+   that can be misread as text artifacts.
+3. **Adaptive thresholding** (`cv2.adaptiveThreshold`, Gaussian) - converts
+   the image to binary black/white using a locally-adaptive threshold, which
+   handles uneven lighting across a document better than a single global
+   threshold value.
+
+## Challenges Faced
+
+- **Python version conflicts with PaddleOCR**: PaddleOCR's wheels only go up
+  to Python 3.13, so the project had to be explicitly pinned to Python 3.12
+  with `uv python pin 3.12` — otherwise `uv add paddlepaddle paddleocr` fails
+  to resolve on newer default Python versions.
+- **Heavy dependencies**: EasyOCR, PaddleOCR, and DocTR all pull in large ML
+  frameworks (PyTorch/PaddlePaddle/TensorFlow), which slows down both local
+  installs and Streamlit Cloud build times, and increases the risk of
+  dependency conflicts between engines if all four are installed at once.
+- **Tesseract binary vs Python wrapper**: `pytesseract` is only a wrapper —
+  the actual Tesseract binary has to be installed separately (`packages.txt`
+  on Streamlit Cloud, or `apt install tesseract-ocr` locally), which is easy
+  to miss and causes a runtime error rather than an install error.
+- **Preprocessing trade-offs**: aggressive thresholding improves results on
+  some clean scanned documents but can hurt accuracy on photos with uneven
+  lighting or shadows (e.g. phone photos of receipts), so preprocessing
+  needed to stay toggleable rather than always-on.
+
+## Possible Improvements
+
+- Add a side-by-side accuracy comparison mode that runs all enabled engines
+  on the same image at once.
+- Add deskewing/rotation correction as an automatic preprocessing step for
+  photographed (non-scanned) documents.
+- Add confidence-score highlighting so low-confidence words are flagged for
+  manual review.
+- Support multi-page PDF uploads in addition to single images.
+- Add language selection in the UI (EasyOCR/PaddleOCR both support many
+  languages beyond English).
+
+## Testing
+
+Tested on 15+ images spanning documents, receipts, invoices, and forms
+(see `sample_inputs/` and corresponding results in `sample_outputs/`).
+
+## Running Locally
+
+```bash
+uv python pin 3.12
+uv sync
+uv run streamlit run app.py
+```
 
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
