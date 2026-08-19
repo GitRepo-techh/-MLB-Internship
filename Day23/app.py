@@ -1,3 +1,4 @@
+import io
 from datetime import datetime
 
 import streamlit as st
@@ -7,7 +8,8 @@ from ocr_utils import (
     preprocess_image,
     run_ocr,
     load_easyocr_reader,
-    load_paddleocr_model
+    load_paddleocr_model,
+    load_doctr_model,
 )
 
 # ---------------------------------------------------------------------------
@@ -33,12 +35,19 @@ def get_paddleocr_model():
     return load_paddleocr_model("en")
 
 
+@st.cache_resource(show_spinner="Loading DocTR model...")
+def get_doctr_model():
+    return load_doctr_model()
+
+
 def get_engine_instance(engine_name: str):
     # Lazily load only the model needed for the selected engine.
     if engine_name == "EasyOCR":
         return get_easyocr_reader()
     elif engine_name == "PaddleOCR":
         return get_paddleocr_model()
+    elif engine_name == "DocTR":
+        return get_doctr_model()
     return None  # Tesseract needs no pre-loaded model
 
 
@@ -49,10 +58,10 @@ st.sidebar.title("⚙️ Settings")
 
 engine_choice = st.sidebar.selectbox(
     "OCR Engine",
-    options=["Tesseract", "EasyOCR", "PaddleOCR"],
+    options=["Tesseract", "EasyOCR", "PaddleOCR", "DocTR"],
     index=0,
     help="Pick which OCR engine extracts the text. Tesseract is lightest; "
-     "EasyOCR and PaddleOCR are deep-learning based and heavier.",
+     "EasyOCR, PaddleOCR, and DocTR are deep-learning based and heavier.",
 )
 
 st.sidebar.markdown("### Preprocessing")

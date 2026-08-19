@@ -1,18 +1,15 @@
-streamlit
-opencv-python-headless
-pillow
-numpy
+streamlit==1.61.1
+numpy==2.3.5
+pillow==12.3.0
+matplotlib==3.11.1
 
-# --- OCR engines ---
-# Tesseract wrapper (lightweight, requires the tesseract binary - see packages.txt)
-pytesseract
+opencv-python-headless==4.14.0.94
 
-# EasyOCR (pulls in torch/torchvision - heavier install)
-easyocr
+easyocr==1.7.2
 
-# PaddleOCR (heavier install, Python <=3.13 required - see README)
-paddlepaddle
-paddleocr
+paddlepaddle==3.3.1
+paddleocr>=3.0.0
 
-# DocTR (pulls in torch or tensorflow - heavier install)
-python-doctr[torch]
+pytesseract==0.3.13
+
+python-doctr[torch]>=1.0.0
