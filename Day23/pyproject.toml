@@ -1,9 +1,10 @@
 [project]
 name = "day23"
 version = "0.1.0"
-description = "Add your description here"
+description = "Document OCR Studio"
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
+
 dependencies = [
     "easyocr>=1.7.2",
     "matplotlib>=3.11.1",
@@ -13,4 +14,9 @@ dependencies = [
     "pillow>=12.3.0",
     "pytesseract>=0.3.13",
     "streamlit>=1.61.1",
+]
+
+[tool.uv]
+override-dependencies = [
+    "opencv-contrib-python==4.14.0.94",
 ]
