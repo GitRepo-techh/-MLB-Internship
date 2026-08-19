@@ -2,14 +2,21 @@ import io
 import numpy as np
 from PIL import Image
 import cv2
+import streamlit as st
 
 
 try:
     import pytesseract
 
-    pytesseract.pytesseract.tesseract_cmd = (
-        r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-    )
+    # On Windows, use the installed Tesseract executable.
+    # On Streamlit Cloud/Linux, Tesseract is provided through PATH.
+    import os
+
+    if os.name == "nt":
+        windows_tesseract = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+        if os.path.exists(windows_tesseract):
+            pytesseract.pytesseract.tesseract_cmd = windows_tesseract
 
 except Exception:
     pytesseract = None
@@ -56,19 +63,16 @@ def load_paddleocr_model(lang="en"):
         enable_mkldnn=False
     )
 
+@st.cache_resource
 def load_doctr_model():
-
     if ocr_predictor is None:
-        raise ImportError(
-            f"DocTR could not be imported. Original error: {DOCTR_IMPORT_ERROR}"
+        raise RuntimeError(
+            f"DocTR is unavailable: {DOCTR_IMPORT_ERROR}"
         )
 
     return ocr_predictor(
-        det_arch="db_resnet50",
-        reco_arch="crnn_vgg16_bn",
         pretrained=True
     )
-
 
 def pil_to_cv2(pil_image: Image.Image) -> np.ndarray:
     # Convert a PIL RGB image to an OpenCV BGR numpy array.
