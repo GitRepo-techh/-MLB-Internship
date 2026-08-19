@@ -8,8 +8,7 @@ from ocr_utils import (
     preprocess_image,
     run_ocr,
     load_easyocr_reader,
-    load_paddleocr_model,
-    load_doctr_model
+    load_paddleocr_model
 )
 
 # ---------------------------------------------------------------------------
@@ -58,7 +57,7 @@ st.sidebar.title("⚙️ Settings")
 
 engine_choice = st.sidebar.selectbox(
     "OCR Engine",
-    options=["Tesseract", "EasyOCR", "PaddleOCR", "DocTR"],
+    options=["Tesseract", "EasyOCR", "PaddleOCR"],
     index=0,
     help="Pick which OCR engine extracts the text. Tesseract is lightest; "
          "EasyOCR/PaddleOCR/DocTR are deep-learning based and heavier.",

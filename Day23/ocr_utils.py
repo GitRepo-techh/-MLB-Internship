@@ -31,16 +31,6 @@ try:
 except Exception:
     PaddleOCR = None
 
-try:
-    from doctr.io import DocumentFile
-    from doctr.models import ocr_predictor
-    DOCTR_IMPORT_ERROR = None
-
-except Exception as e:
-    DocumentFile = None
-    ocr_predictor = None
-    DOCTR_IMPORT_ERROR = e
-
 
 
 def load_easyocr_reader(lang_list=("en",)):
@@ -63,16 +53,6 @@ def load_paddleocr_model(lang="en"):
         enable_mkldnn=False
     )
 
-@st.cache_resource
-def load_doctr_model():
-    if ocr_predictor is None:
-        raise RuntimeError(
-            f"DocTR is unavailable: {DOCTR_IMPORT_ERROR}"
-        )
-
-    return ocr_predictor(
-        pretrained=True
-    )
 
 def pil_to_cv2(pil_image: Image.Image) -> np.ndarray:
     # Convert a PIL RGB image to an OpenCV BGR numpy array.
@@ -182,23 +162,6 @@ def extract_text_paddleocr(pil_image: Image.Image, model) -> str:
     except Exception as e:
         return f"[PaddleOCR error: {e}]"
 
-def extract_text_doctr(pil_image: Image.Image, model) -> str:
-
-    if ocr_predictor is None or model is None:
-        return "[DocTR not available - check installation]"
-    buffer = io.BytesIO()
-    pil_image.convert("RGB").save(buffer, format="PNG")
-    buffer.seek(0)
-    doc = DocumentFile.from_images(buffer.read())
-    result = model(doc)
-    lines = []
-    for page in result.pages:
-        for block in page.blocks:
-            for line in block.lines:
-                words = [word.value for word in line.words]
-                lines.append(" ".join(words))
-    return "\n".join(lines).strip()
-
 
 
 
@@ -210,8 +173,6 @@ def run_ocr(engine_name: str, pil_image: Image.Image, engine_instance=None) -> s
         return extract_text_easyocr(pil_image, engine_instance)
     elif engine_name == "PaddleOCR":
         return extract_text_paddleocr(pil_image, engine_instance)
-    elif engine_name == "DocTR":
-        return extract_text_doctr(pil_image, engine_instance)
     else:
         return "[Unknown OCR engine selected]"
 

@@ -12,6 +12,5 @@ dependencies = [
     "paddlepaddle>=3.3.1",
     "pillow>=12.3.0",
     "pytesseract>=0.3.13",
-    "python-doctr==1.0.0",
     "streamlit>=1.61.1",
 ]
