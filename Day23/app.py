@@ -41,7 +41,7 @@ def get_doctr_model():
 
 
 def get_engine_instance(engine_name: str):
-    """Lazily load only the model needed for the selected engine."""
+    # Lazily load only the model needed for the selected engine.
     if engine_name == "EasyOCR":
         return get_easyocr_reader()
     elif engine_name == "PaddleOCR":
