@@ -14,5 +14,3 @@ easyocr
 paddlepaddle
 paddleocr
 
-# DocTR (pulls in torch or tensorflow - heavier install)
-python-doctr[torch]
