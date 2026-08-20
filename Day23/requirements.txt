@@ -13,3 +13,6 @@ paddleocr>=3.0.0
 pytesseract==0.3.13
 
 python-doctr[torch]>=1.0.0
+
+rapidocr>=2.0.0
+onnxruntime>=1.18.0
