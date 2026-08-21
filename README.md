@@ -1889,6 +1889,78 @@ uv python pin 3.12
 uv sync
 uv run streamlit run app.py
 ```
+# Day 25 - Feature Detection & Matching
+
+This project demonstrates **feature detection and feature matching** using OpenCV.
+
+## Features
+
+* **Harris Corner Detection**: Detects corner locations in images.
+* **ORB**: Detects keypoints and generates binary descriptors.
+* **Feature Matching**: Matches ORB features between two images using:
+
+  * Brute-Force Hamming Matcher
+  * Lowe's Ratio Test
+* Calculates **feature similarity** and classifies matches as:
+
+  * Strong
+  * Moderate
+  * Weak
+  * Poor
+* Saves visual match results and comparison reports.
+
+## Folder Structure
+
+```text
+Day25/
+├── input images/
+├── output images/
+├── comparison/
+├── feature_detection.py
+└── feature_matching.py
+```
+
+## Usage
+
+### Feature Detection
+
+```bash
+python feature_detection.py
+```
+
+Or provide an image:
+
+```bash
+python feature_detection.py image.jpg
+```
+
+### Feature Matching
+
+Process image pairs automatically:
+
+```bash
+python feature_matching.py
+```
+
+Images should follow a naming pattern such as:
+
+```text
+image1.jpg
+image2.jpg
+```
+
+Manual comparison:
+
+```bash
+python feature_matching.py image1.jpg image2.jpg
+```
+
+## Output
+
+* `output images/` → Harris and ORB detection images
+* `comparison/` → matched feature images and `.txt` comparison reports
+
+**Requirements:** Python 3.x, OpenCV (`cv2`), NumPy.
 
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
