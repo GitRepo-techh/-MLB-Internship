@@ -27,7 +27,7 @@ def process_image(path, filename):
     gray = to_grayscale(img_bgr)
 
     # 2. binary threshold
-    binary = binary_threshold(gray, thresh_val=127)
+    binary = binary_threshold(gray, thresh_val=120)
 
     # 3. adaptive threshold
     adaptive = adaptive_threshold(gray, block_size=11, c=2)
@@ -64,8 +64,7 @@ def main():
     files = [f for f in os.listdir(INPUT_DIR) if f.lower().endswith(VALID_EXTS)]
 
     if not files:
-        print(f"No images found in ./{INPUT_DIR}. Add at least 15 images "
-              f"(documents, plain-background objects, uneven lighting, shadows).")
+        print(f"No images found in ./{INPUT_DIR}. Add at least 15 images")
         return
 
     print(f"Processing {len(files)} image(s)...")

@@ -67,7 +67,7 @@ def remove_background_grabcut(img_bgr, rect=None, iterations=5):
 
     h, w = img_bgr.shape[:2]
     if rect is None:
-        margin_x, margin_y = int(w * 0.05), int(h * 0.05)
+        margin_x, margin_y = int(w * 0.08), int(h * 0.08)
         rect = (margin_x, margin_y, w - 2 * margin_x, h - 2 * margin_y)
 
     mask = np.zeros((h, w), np.uint8)

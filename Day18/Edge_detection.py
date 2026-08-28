@@ -112,11 +112,11 @@ dilate = cv2.dilate(image2, kernel, iterations = 2) # This function removes smal
 r_dil = cv2.resize(dilate, (300,300))
 
 # Open-Head:
-open_head = cv2.morphologyEx(image3, cv2.MORPH_OPEN, kernel) # This is errosion - dillution. It removes small things in the kernel area.
+open_head = cv2.morphologyEx(image3, cv2.MORPH_OPEN, kernel) # This is errosion - dillution. It removes small spaces in the kernel area.
 r_open = cv2.resize(open_head, (300,300))
 
 # Close-Head:
-close = cv2.morphologyEx(image__, cv2.MORPH_CLOSE, kernel) # This is dilution - errosion. It fills small things in the kernel area.
+close = cv2.morphologyEx(image__, cv2.MORPH_CLOSE, kernel) # This is dilution - errosion. It fills small spaces in the kernel area.
 r_close = cv2.resize(close, (300,300))
 
 # f.

@@ -1,16 +1,3 @@
-"""
-Day 25 - Feature Detection
---------------------------
-Detects features in a single image using two "engineered feature" methods:
-
-1. Harris Corner Detection  -> gives CORNER LOCATIONS only (no descriptor)
-2. ORB (Oriented FAST + Rotated BRIEF) -> gives KEYPOINTS + BINARY DESCRIPTORS
-
-Usage:
-    python feature_detection.py path/to/image.jpg
-    python feature_detection.py            # runs on an auto-generated demo image
-"""
-
 import os
 import sys
 import time
