@@ -9,7 +9,7 @@ from ultralytics import YOLO
 # ── CONFIG ────────────────────────────────────────────────────────────
 # Update this path to point at your chosen best.pt (the 23-epoch
 # "helmet_detector" run had the best metrics — mAP50 93.4%)
-MODEL_PATH = "C:/VsCode/-MLB-Internship/Day27/best.pt"
+MODEL_PATH = "best.pt"
 CONF_THRESHOLD = 0.25
 
 st.set_page_config(page_title="Helmet Detection", layout="wide")
