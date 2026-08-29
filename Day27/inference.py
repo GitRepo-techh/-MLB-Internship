@@ -1,7 +1,11 @@
+import os
 from ultralytics import YOLO
 
-# 1. Load your trained model
-model = YOLO("C:/VsCode/-MLB-Internship/runs/detect/train-7/weights/best.pt")
+# 1. Load your trained model — path relative to this script's location
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "app", "best.pt")
+
+model = YOLO(MODEL_PATH)
 
 # 2. Run inference on your test folder
 results = model.predict(
