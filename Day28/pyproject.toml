@@ -5,8 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "ffmpeg>=1.4",
-    "opencv-python-headless>=5.0.0.93",
-    "streamlit>=1.62.0",
-    "ultralytics>=8.4.136",
+    "streamlit",
+    "ultralytics",
+    "opencv-python-headless>=4.10,<5",
+    "lap>=0.5.13",
 ]
