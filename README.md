@@ -2234,6 +2234,66 @@ Day-29/
 ## Summary
 
 This project trained a 4-class YOLOv8 object detection model (with helmet, without helmet, rider, number plate) achieving 93.4% mAP@50 on the validation set — exceeding the 80% target — using a small (~100 image) dataset trained locally on CPU in ~15 minutes. The model was deployed via a Streamlit app supporting both image and video inference. The main lesson from this project was the gap between strong validation metrics and real-world generalization on unseen images, pointing toward dataset size and augmentation as the next areas for improvement.
+# Day 30 — Object Tracking with YOLO
 
+## What is Object Tracking?
+Object tracking follows the *same* object across consecutive video frames, assigning
+it a persistent ID that stays constant even as the object moves, gets partially
+occluded, or temporarily overlaps with another object.
+
+## Detection vs. Tracking
+- **Detection** finds objects in a *single* frame — a box + class + confidence, with
+  no memory of what happened in previous frames. Run it on the next frame and every
+  object could get a "new" identity.
+- **Tracking** links detections across frames into consistent identities using motion
+  prediction (Kalman filter) and spatial overlap (IoU), so "car #4" stays "car #4"
+  for the whole clip instead of being re-detected as a new object every frame.
+
+## Tracking Algorithm Used
+This project uses **Ultralytics' built-in tracking (`model.track()`)**, with a
+dropdown to switch between:
+- **ByteTrack** — lightweight, motion + IoU only. Fast, good default for most footage.
+- **BoT-SORT** — adds camera-motion compensation and optional appearance ReID, more
+  robust when objects overlap heavily or the camera itself moves.
+
+`persist=True` keeps each tracker's internal state (active tracks, Kalman filters)
+alive across frames of the same video, which is what keeps IDs stable when two
+objects cross paths — the tracker predicts where each box *should* be next frame,
+so a brief overlap doesn't get misread as two new objects appearing.
+
+## Files
+- `tracking_script.py` — coding-practice script: batch-runs tracking over every
+  video in `sample_videos/`, prints a unique-object-count summary, saves annotated
+  clips to `output_videos/`.
+- `app.py` — the Streamlit mini project: upload a video, pick a tracker, see live
+  ID + confidence overlays, get a unique-object count, and download the processed video.
+- `requirements.txt` / `packages.txt` — Python + system (ffmpeg) dependencies for
+  Streamlit Cloud deployment.
+
+## Challenges Faced While Tracking Objects
+- **ID switching on occlusion**: when objects fully overlap for several frames, the
+  tracker can lose the track and reassign a new ID once they separate. BoT-SORT's
+  ReID helps but is slower.
+- **Browser-playable video output**: OpenCV's `mp4v` codec writes files that many
+  browsers (and Streamlit's video player) won't play back. Fixed by re-encoding to
+  H.264 with `ffmpeg` after processing (see `convert_to_h264()` in `app.py`).
+- **Streamlit Cloud dependency issues**: `opencv-python` pulls in `libGL`, which
+  isn't available on the cloud's headless environment — switched to
+  `opencv-python-headless` to avoid import errors.
+- **Fast-moving objects**: large frame-to-frame displacement can push objects outside
+  the tracker's IoU-matching threshold, causing dropped/reassigned IDs — mitigated by
+  tuning `track_buffer` / `match_thresh` in the tracker YAML for faster footage
+  (e.g. sports clips).
+
+## How to Run Locally
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+For the batch coding-practice script, drop 5 short videos into `sample_videos/` and run:
+```bash
+python tracking_script.py
+```
 ## 📌 Notes
 More days and topics will be added here as the internship progresses.
