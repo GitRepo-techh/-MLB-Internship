@@ -1,192 +1,126 @@
-"""
-Day 27 - Smart Object Detection App
-Streamlit app for running pretrained YOLOv8 inference on images and videos,
-with per-class colored bounding boxes, confidence display, and downloads.
-"""
-
 import io
-import os
-import subprocess
-import tempfile
-
 import cv2
 import numpy as np
 import streamlit as st
 from PIL import Image
-from ultralytics import YOLO
-import imageio_ffmpeg
 
+from segementation_script import (
+    to_grayscale,
+    binary_threshold,
+    adaptive_threshold,
+    otsu_threshold,
+    watershed_segmentation,
+    remove_background_grabcut,
+)
 
-def reencode_to_h264(input_path: str, output_path: str) -> None:
-    """Browsers can't play OpenCV's mp4v output — re-encode to H.264 with ffmpeg."""
-    ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
-    result = subprocess.run(
-        [ffmpeg_exe, "-y", "-i", input_path,
-         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-         output_path],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    if result.returncode != 0:
-        st.error("ffmpeg re-encode failed:")
-        st.code(result.stderr[-2000:])  # last part of the log, most relevant
-        raise RuntimeError("ffmpeg re-encode failed")
+st.set_page_config(page_title="Document & Object Segmentation Tool", layout="wide")
 
-st.set_page_config(page_title="Smart Object Detection", page_icon="🔍", layout="centered")
+# Light ivory theme (overrides default Streamlit white) + soft card styling.
+# Colors also live in .streamlit/config.toml, this CSS adds the card/border polish.
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: #F5F1E8;
+    }
+    section[data-testid="stSidebar"] {
+        background-color: #EDE6D8;
+    }
+    div[data-testid="stFileUploader"], div[data-testid="stImage"] {
+        background-color: #FFFDF8;
+        border: 1px solid #DCD3BF;
+        border-radius: 10px;
+        padding: 12px;
+    }
+    .stButton > button, .stDownloadButton > button {
+        background-color: #2E7D6B;
+        color: #FFFDF8;
+        border-radius: 8px;
+        border: none;
+    }
+    .stButton > button:hover, .stDownloadButton > button:hover {
+        background-color: #256456;
+        color: #FFFDF8;
+    }
+    h1, h2, h3 {
+        color: #2B2B28;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-# ---------------------------------------------------------------------------
-# Model loading (cached so it only loads once per session)
-# ---------------------------------------------------------------------------
-@st.cache_resource
-def load_model():
-    return YOLO("yolov8n.pt")
+st.title("📄 Document & Object Segmentation Tool")
+st.caption("Day 26 — Upload an image, choose a segmentation method, and download the result.")
 
+METHODS = [
+    "Binary Thresholding",
+    "Adaptive Thresholding",
+    "Otsu Thresholding",
+    "Watershed (touching objects)",
+    "GrabCut (foreground/background)",
+]
 
-model = load_model()
+uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "bmp", "webp"])
+method = st.selectbox("Segmentation method", METHODS)
 
+# extra controls per method
+if method == "Binary Thresholding":
+    thresh_val = st.slider("Threshold value", 0, 255, 127)
+elif method == "Adaptive Thresholding":
+    block_size = st.slider("Block size (odd)", 3, 51, 11, step=2)
+    c_val = st.slider("C (constant subtracted)", -10, 10, 2)
 
-# ---------------------------------------------------------------------------
-# Deterministic color per class (so the same class always gets the same color)
-# ---------------------------------------------------------------------------
-def get_class_color(cls_id: int):
-    np.random.seed(cls_id)  # deterministic per class id
-    return tuple(int(c) for c in np.random.randint(60, 255, size=3))
+if uploaded_file is not None:
+    pil_img = Image.open(uploaded_file).convert("RGB")
+    img_bgr = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
 
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Original")
+        st.image(pil_img, use_container_width=True)
 
-def draw_detections(frame_bgr, results, box_thickness=2, font_scale=0.6):
-    """Draw boxes with a distinct color per class, plus label + confidence."""
-    annotated = frame_bgr.copy()
-    boxes = results.boxes
+    # run selected method
+    is_color_output = False
+    if method == "Binary Thresholding":
+        gray = to_grayscale(img_bgr)
+        result = binary_threshold(gray, thresh_val=thresh_val)
+    elif method == "Adaptive Thresholding":
+        gray = to_grayscale(img_bgr)
+        result = adaptive_threshold(gray, block_size=block_size, c=c_val)
+    elif method == "Otsu Thresholding":
+        gray = to_grayscale(img_bgr)
+        result, otsu_val = otsu_threshold(gray)
+        st.info(f"Otsu auto-selected threshold: {int(otsu_val)}")
+    elif method == "Watershed (touching objects)":
+        result, _ = watershed_segmentation(img_bgr)
+        is_color_output = True
+    else:  # GrabCut
+        result, _ = remove_background_grabcut(img_bgr)
+        is_color_output = True
 
-    for box in boxes:
-        cls_id = int(box.cls[0])
-        conf = float(box.conf[0])
-        x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
-        color = get_class_color(cls_id)
-        label = f"{model.names[cls_id]} {conf:.2f}"
-
-        cv2.rectangle(annotated, (x1, y1), (x2, y2), color, box_thickness)
-
-        (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, font_scale, 1)
-        cv2.rectangle(annotated, (x1, max(0, y1 - th - 8)), (x1 + tw + 4, y1), color, -1)
-        cv2.putText(annotated, label, (x1 + 2, y1 - 4),
-                    cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), 1, cv2.LINE_AA)
-
-    return annotated
-
-
-# ---------------------------------------------------------------------------
-# UI
-# ---------------------------------------------------------------------------
-st.title("🔍 Smart Object Detection")
-st.caption("Pretrained YOLOv8 · Ultralytics · COCO classes")
-
-conf_threshold = st.slider("Confidence threshold", 0.05, 1.0, 0.4, 0.05)
-mode = st.radio("Input type", ["Image", "Video"], horizontal=True)
-
-st.divider()
-
-# ---------------------------------------------------------------------------
-# Image mode
-# ---------------------------------------------------------------------------
-if mode == "Image":
-    uploaded = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "webp"])
-
-    if uploaded:
-        image = Image.open(uploaded).convert("RGB")
-        img_array = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-
-        with st.spinner("Running detection..."):
-            results = model(img_array, conf=conf_threshold, verbose=False)[0]
-            annotated = draw_detections(img_array, results)
-
-        st.image(cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB),
-                  caption="Detected Objects", use_container_width=True)
-
-        if len(results.boxes) > 0:
-            st.subheader("Detections")
-            rows = [
-                {"Class": model.names[int(b.cls[0])], "Confidence": f"{float(b.conf[0]):.2f}"}
-                for b in results.boxes
-            ]
-            st.table(rows)
+    with col2:
+        st.subheader("Segmented Output")
+        if is_color_output:
+            display_img = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
         else:
-            st.info("No objects detected above this confidence threshold. Try lowering it.")
+            display_img = result
+        st.image(display_img, use_container_width=True, clamp=True)
 
-        success, buffer = cv2.imencode(".png", annotated)
-        st.download_button(
-            "⬇️ Download processed image",
-            data=buffer.tobytes(),
-            file_name="detected.png",
-            mime="image/png",
-        )
+    # prepare download
+    if is_color_output:
+        out_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
+    else:
+        out_pil = Image.fromarray(result)
 
-# ---------------------------------------------------------------------------
-# Video mode
-# ---------------------------------------------------------------------------
+    buf = io.BytesIO()
+    out_pil.save(buf, format="PNG")
+
+    st.download_button(
+        label="⬇️ Download segmented image",
+        data=buf.getvalue(),
+        file_name=f"segmented_{method.split()[0].lower()}.png",
+        mime="image/png",
+    )
 else:
-    uploaded_vid = st.file_uploader("Upload a video", type=["mp4", "mov", "avi", "mkv"])
-
-    if uploaded_vid:
-        tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
-        tfile.write(uploaded_vid.read())
-        tfile.flush()
-
-        cap = cv2.VideoCapture(tfile.name)
-        fps = cap.get(cv2.CAP_PROP_FPS) or 20
-        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) or 1
-
-        raw_out_path = os.path.join(tempfile.gettempdir(), "detected_video_raw.mp4")
-        out_path = os.path.join(tempfile.gettempdir(), "detected_video.mp4")
-        writer = cv2.VideoWriter(raw_out_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (w, h))
-
-        progress_bar = st.progress(0, text="Processing video...")
-        frame_i = 0
-        class_counts = {}
-
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            results = model(frame, conf=conf_threshold, verbose=False)[0]
-            annotated_frame = draw_detections(frame, results)
-            writer.write(annotated_frame)
-
-            for b in results.boxes:
-                name = model.names[int(b.cls[0])]
-                class_counts[name] = class_counts.get(name, 0) + 1
-
-            frame_i += 1
-            progress_bar.progress(min(frame_i / total_frames, 1.0),
-                                   text=f"Processing video... {frame_i}/{total_frames} frames")
-
-        cap.release()
-        writer.release()
-
-        progress_bar.progress(1.0, text="Re-encoding for browser playback...")
-        reencode_to_h264(raw_out_path, out_path)
-        os.remove(raw_out_path)
-        progress_bar.empty()
-
-        st.success("Done!")
-        st.video(out_path)
-
-        if class_counts:
-            st.subheader("Detected classes (frame count)")
-            st.table([{"Class": k, "Frames detected in": v} for k, v in
-                       sorted(class_counts.items(), key=lambda x: -x[1])])
-
-        with open(out_path, "rb") as f:
-            st.download_button(
-                "⬇️ Download processed video",
-                data=f,
-                file_name="detected_video.mp4",
-                mime="video/mp4",
-            )
-
-st.divider()
-st.caption("Model: YOLOv8n (pretrained on COCO, 80 classes) · Built with Ultralytics + Streamlit")
+    st.info("Upload an image to get started.")

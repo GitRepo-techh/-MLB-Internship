@@ -1,126 +1,98 @@
-import io
 import cv2
 import numpy as np
 import streamlit as st
 from PIL import Image
 
-from segementation_script import (
-    to_grayscale,
-    binary_threshold,
-    adaptive_threshold,
-    otsu_threshold,
-    watershed_segmentation,
-    remove_background_grabcut,
-)
 
-st.set_page_config(page_title="Document & Object Segmentation Tool", layout="wide")
+def orb_detect(img_rgb, n_features=1000):
+    
+    # Detect ORB keypoints + descriptors on an RGB numpy image.
+    gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
+    orb = cv2.ORB_create(nfeatures=n_features)
+    kp, des = orb.detectAndCompute(gray, None)
+    return kp, des
 
-# Light ivory theme (overrides default Streamlit white) + soft card styling.
-# Colors also live in .streamlit/config.toml, this CSS adds the card/border polish.
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background-color: #F5F1E8;
-    }
-    section[data-testid="stSidebar"] {
-        background-color: #EDE6D8;
-    }
-    div[data-testid="stFileUploader"], div[data-testid="stImage"] {
-        background-color: #FFFDF8;
-        border: 1px solid #DCD3BF;
-        border-radius: 10px;
-        padding: 12px;
-    }
-    .stButton > button, .stDownloadButton > button {
-        background-color: #2E7D6B;
-        color: #FFFDF8;
-        border-radius: 8px;
-        border: none;
-    }
-    .stButton > button:hover, .stDownloadButton > button:hover {
-        background-color: #256456;
-        color: #FFFDF8;
-    }
-    h1, h2, h3 {
-        color: #2B2B28;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
-st.title("📄 Document & Object Segmentation Tool")
-st.caption("Day 26 — Upload an image, choose a segmentation method, and download the result.")
+def match_features(des1, des2, ratio=0.75):
 
-METHODS = [
-    "Binary Thresholding",
-    "Adaptive Thresholding",
-    "Otsu Thresholding",
-    "Watershed (touching objects)",
-    "GrabCut (foreground/background)",
-]
 
-uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png", "bmp", "webp"])
-method = st.selectbox("Segmentation method", METHODS)
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=False)
+    knn_matches = bf.knnMatch(des1, des2, k=2)
 
-# extra controls per method
-if method == "Binary Thresholding":
-    thresh_val = st.slider("Threshold value", 0, 255, 127)
-elif method == "Adaptive Thresholding":
-    block_size = st.slider("Block size (odd)", 3, 51, 11, step=2)
-    c_val = st.slider("C (constant subtracted)", -10, 10, 2)
+    good_matches = []
+    for pair in knn_matches:
+        if len(pair) == 2:
+            m, n = pair
+            if m.distance < ratio * n.distance:
+                good_matches.append(m)
 
-if uploaded_file is not None:
-    pil_img = Image.open(uploaded_file).convert("RGB")
-    img_bgr = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+    good_matches = sorted(good_matches, key=lambda m: m.distance)
+    return good_matches
 
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("Original")
-        st.image(pil_img, use_container_width=True)
 
-    # run selected method
-    is_color_output = False
-    if method == "Binary Thresholding":
-        gray = to_grayscale(img_bgr)
-        result = binary_threshold(gray, thresh_val=thresh_val)
-    elif method == "Adaptive Thresholding":
-        gray = to_grayscale(img_bgr)
-        result = adaptive_threshold(gray, block_size=block_size, c=c_val)
-    elif method == "Otsu Thresholding":
-        gray = to_grayscale(img_bgr)
-        result, otsu_val = otsu_threshold(gray)
-        st.info(f"Otsu auto-selected threshold: {int(otsu_val)}")
-    elif method == "Watershed (touching objects)":
-        result, _ = watershed_segmentation(img_bgr)
-        is_color_output = True
-    else:  # GrabCut
-        result, _ = remove_background_grabcut(img_bgr)
-        is_color_output = True
+def process(img1, img2, n_features, ratio, max_lines):
+    """Run ORB detection + matching. img1/img2 are RGB numpy arrays."""
+    kp1, des1 = orb_detect(img1, n_features=n_features)
+    kp2, des2 = orb_detect(img2, n_features=n_features)
 
-    with col2:
-        st.subheader("Segmented Output")
-        if is_color_output:
-            display_img = cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
-        else:
-            display_img = result
-        st.image(display_img, use_container_width=True, clamp=True)
+    if des1 is None or des2 is None or len(kp1) == 0 or len(kp2) == 0:
+        return None, len(kp1), len(kp2), 0
 
-    # prepare download
-    if is_color_output:
-        out_pil = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
-    else:
-        out_pil = Image.fromarray(result)
+    good_matches = match_features(des1, des2, ratio=ratio)
 
-    buf = io.BytesIO()
-    out_pil.save(buf, format="PNG")
-
-    st.download_button(
-        label="⬇️ Download segmented image",
-        data=buf.getvalue(),
-        file_name=f"segmented_{method.split()[0].lower()}.png",
-        mime="image/png",
+    matched_img = cv2.drawMatches(
+        img1, kp1, img2, kp2, good_matches[:max_lines], None,
+        flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS
     )
+    return matched_img, len(kp1), len(kp2), len(good_matches)
+
+
+# ---------------- Streamlit UI ----------------
+
+st.set_page_config(page_title="Feature Matching System", layout="wide")
+
+st.title("🔍 Image Feature Matching System")
+st.write(
+    "Upload two images (same object/scene from different angles, logos, "
+    "book covers, landmarks, etc.) to detect and match ORB features."
+)
+
+col1, col2 = st.columns(2)
+with col1:
+    file1 = st.file_uploader("Upload Image 1", type=["jpg", "jpeg", "png"], key="img1")
+with col2:
+    file2 = st.file_uploader("Upload Image 2", type=["jpg", "jpeg", "png"], key="img2")
+
+st.sidebar.header("Settings")
+n_features = st.sidebar.slider("Max ORB Features", 100, 2000, 1000, step=100)
+ratio = st.sidebar.slider("Lowe's Ratio Test Threshold", 0.5, 0.95, 0.75, step=0.05)
+max_lines = st.sidebar.slider("Max Match Lines to Draw", 5, 200, 50, step=5)
+
+if file1 is not None and file2 is not None:
+    img1 = np.array(Image.open(file1).convert("RGB"))
+    img2 = np.array(Image.open(file2).convert("RGB"))
+
+    preview_col1, preview_col2 = st.columns(2)
+    with preview_col1:
+        st.image(img1, caption="Image 1", use_container_width=True)
+    with preview_col2:
+        st.image(img2, caption="Image 2", use_container_width=True)
+
+    if st.button("Match Features", type="primary"):
+        with st.spinner("Detecting and matching features..."):
+            matched_img, kp1_count, kp2_count, good_count = process(
+                img1, img2, n_features, ratio, max_lines
+            )
+
+        if matched_img is None:
+            st.error("No descriptors found in one of the images — cannot match.")
+        else:
+            st.subheader("Matched Features")
+            st.image(matched_img, use_container_width=True)
+
+            m1, m2, m3 = st.columns(3)
+            m1.metric("Keypoints in Image 1", kp1_count)
+            m2.metric("Keypoints in Image 2", kp2_count)
+            m3.metric("Good Matches", good_count)
 else:
-    st.info("Upload an image to get started.")
+    st.info("Upload both images to run feature matching.")
