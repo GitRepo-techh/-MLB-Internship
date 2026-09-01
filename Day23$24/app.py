@@ -15,9 +15,7 @@ from ocr_utils import (
     load_rapidocr_model,
 )
 
-# ---------------------------------------------------------------------------
-# Page config
-# ---------------------------------------------------------------------------
+
 st.set_page_config(
     page_title="Document OCR Studio",
     page_icon="📄",
@@ -25,9 +23,7 @@ st.set_page_config(
 )
 
 
-# ---------------------------------------------------------------------------
-# Cached model loaders - each engine's model/reader loads only once per session
-# ---------------------------------------------------------------------------
+
 @st.cache_resource(show_spinner="Loading EasyOCR model...")
 def get_easyocr_reader():
     return load_easyocr_reader(["en"])
