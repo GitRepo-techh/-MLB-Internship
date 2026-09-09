@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "huggingface-hub>=0.28.0",
+    "lapx>=0.10.0",
     "opencv-python>=4.10.0,<5.0.0",
     "streamlit>=1.63.0",
     "ultralytics>=8.4.144",
