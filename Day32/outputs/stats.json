@@ -1,0 +1,497 @@
+{
+  "total_vehicles": 88,
+  "total_violations": 69,
+  "wrong_way_violations": 54,
+  "restricted_zone_violations": 15,
+  "vehicle_type_counts": {
+    "car": 61,
+    "truck": 17,
+    "motorcycle": 9,
+    "bus": 1
+  },
+  "violation_events": [
+    {
+      "track_id": 6,
+      "vehicle_type": "car",
+      "violation_type": "restricted_zone",
+      "frame": 1,
+      "timestamp_sec": 0.04
+    },
+    {
+      "track_id": 12,
+      "vehicle_type": "motorcycle",
+      "violation_type": "restricted_zone",
+      "frame": 1,
+      "timestamp_sec": 0.04
+    },
+    {
+      "track_id": 18,
+      "vehicle_type": "car",
+      "violation_type": "restricted_zone",
+      "frame": 1,
+      "timestamp_sec": 0.04
+    },
+    {
+      "track_id": 1,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 5,
+      "timestamp_sec": 0.2
+    },
+    {
+      "track_id": 2,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 5,
+      "timestamp_sec": 0.2
+    },
+    {
+      "track_id": 4,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 5,
+      "timestamp_sec": 0.2
+    },
+    {
+      "track_id": 5,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 5,
+      "timestamp_sec": 0.2
+    },
+    {
+      "track_id": 7,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 5,
+      "timestamp_sec": 0.2
+    },
+    {
+      "track_id": 9,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 5,
+      "timestamp_sec": 0.2
+    },
+    {
+      "track_id": 10,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 5,
+      "timestamp_sec": 0.2
+    },
+    {
+      "track_id": 11,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 5,
+      "timestamp_sec": 0.2
+    },
+    {
+      "track_id": 14,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 5,
+      "timestamp_sec": 0.2
+    },
+    {
+      "track_id": 16,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 5,
+      "timestamp_sec": 0.2
+    },
+    {
+      "track_id": 12,
+      "vehicle_type": "motorcycle",
+      "violation_type": "wrong_way",
+      "frame": 7,
+      "timestamp_sec": 0.28
+    },
+    {
+      "track_id": 19,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 7,
+      "timestamp_sec": 0.28
+    },
+    {
+      "track_id": 17,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 8,
+      "timestamp_sec": 0.32
+    },
+    {
+      "track_id": 22,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 9,
+      "timestamp_sec": 0.36
+    },
+    {
+      "track_id": 13,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 9,
+      "timestamp_sec": 0.36
+    },
+    {
+      "track_id": 8,
+      "vehicle_type": "motorcycle",
+      "violation_type": "wrong_way",
+      "frame": 10,
+      "timestamp_sec": 0.4
+    },
+    {
+      "track_id": 6,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 11,
+      "timestamp_sec": 0.44
+    },
+    {
+      "track_id": 28,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 11,
+      "timestamp_sec": 0.44
+    },
+    {
+      "track_id": 30,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 12,
+      "timestamp_sec": 0.48
+    },
+    {
+      "track_id": 26,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 12,
+      "timestamp_sec": 0.48
+    },
+    {
+      "track_id": 3,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 16,
+      "timestamp_sec": 0.64
+    },
+    {
+      "track_id": 32,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 23,
+      "timestamp_sec": 0.92
+    },
+    {
+      "track_id": 3,
+      "vehicle_type": "car",
+      "violation_type": "restricted_zone",
+      "frame": 28,
+      "timestamp_sec": 1.12
+    },
+    {
+      "track_id": 39,
+      "vehicle_type": "truck",
+      "violation_type": "restricted_zone",
+      "frame": 30,
+      "timestamp_sec": 1.2
+    },
+    {
+      "track_id": 39,
+      "vehicle_type": "truck",
+      "violation_type": "wrong_way",
+      "frame": 34,
+      "timestamp_sec": 1.36
+    },
+    {
+      "track_id": 42,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 35,
+      "timestamp_sec": 1.4
+    },
+    {
+      "track_id": 36,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 39,
+      "timestamp_sec": 1.56
+    },
+    {
+      "track_id": 18,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 39,
+      "timestamp_sec": 1.56
+    },
+    {
+      "track_id": 50,
+      "vehicle_type": "truck",
+      "violation_type": "restricted_zone",
+      "frame": 40,
+      "timestamp_sec": 1.6
+    },
+    {
+      "track_id": 52,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 49,
+      "timestamp_sec": 1.96
+    },
+    {
+      "track_id": 51,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 49,
+      "timestamp_sec": 1.96
+    },
+    {
+      "track_id": 53,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 51,
+      "timestamp_sec": 2.04
+    },
+    {
+      "track_id": 65,
+      "vehicle_type": "truck",
+      "violation_type": "restricted_zone",
+      "frame": 68,
+      "timestamp_sec": 2.72
+    },
+    {
+      "track_id": 67,
+      "vehicle_type": "truck",
+      "violation_type": "restricted_zone",
+      "frame": 70,
+      "timestamp_sec": 2.8
+    },
+    {
+      "track_id": 68,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 75,
+      "timestamp_sec": 3.0
+    },
+    {
+      "track_id": 73,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 82,
+      "timestamp_sec": 3.28
+    },
+    {
+      "track_id": 70,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 85,
+      "timestamp_sec": 3.4
+    },
+    {
+      "track_id": 79,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 92,
+      "timestamp_sec": 3.68
+    },
+    {
+      "track_id": 81,
+      "vehicle_type": "truck",
+      "violation_type": "restricted_zone",
+      "frame": 99,
+      "timestamp_sec": 3.96
+    },
+    {
+      "track_id": 83,
+      "vehicle_type": "motorcycle",
+      "violation_type": "wrong_way",
+      "frame": 124,
+      "timestamp_sec": 4.96
+    },
+    {
+      "track_id": 85,
+      "vehicle_type": "truck",
+      "violation_type": "restricted_zone",
+      "frame": 125,
+      "timestamp_sec": 5.0
+    },
+    {
+      "track_id": 87,
+      "vehicle_type": "truck",
+      "violation_type": "restricted_zone",
+      "frame": 136,
+      "timestamp_sec": 5.44
+    },
+    {
+      "track_id": 91,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 147,
+      "timestamp_sec": 5.88
+    },
+    {
+      "track_id": 89,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 147,
+      "timestamp_sec": 5.88
+    },
+    {
+      "track_id": 95,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 150,
+      "timestamp_sec": 6.0
+    },
+    {
+      "track_id": 92,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 151,
+      "timestamp_sec": 6.04
+    },
+    {
+      "track_id": 97,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 156,
+      "timestamp_sec": 6.24
+    },
+    {
+      "track_id": 99,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 164,
+      "timestamp_sec": 6.56
+    },
+    {
+      "track_id": 105,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 174,
+      "timestamp_sec": 6.96
+    },
+    {
+      "track_id": 115,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 189,
+      "timestamp_sec": 7.56
+    },
+    {
+      "track_id": 121,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 206,
+      "timestamp_sec": 8.24
+    },
+    {
+      "track_id": 133,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 224,
+      "timestamp_sec": 8.96
+    },
+    {
+      "track_id": 131,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 228,
+      "timestamp_sec": 9.12
+    },
+    {
+      "track_id": 149,
+      "vehicle_type": "truck",
+      "violation_type": "restricted_zone",
+      "frame": 247,
+      "timestamp_sec": 9.88
+    },
+    {
+      "track_id": 150,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 252,
+      "timestamp_sec": 10.08
+    },
+    {
+      "track_id": 157,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 259,
+      "timestamp_sec": 10.36
+    },
+    {
+      "track_id": 158,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 259,
+      "timestamp_sec": 10.36
+    },
+    {
+      "track_id": 165,
+      "vehicle_type": "motorcycle",
+      "violation_type": "restricted_zone",
+      "frame": 260,
+      "timestamp_sec": 10.4
+    },
+    {
+      "track_id": 161,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 261,
+      "timestamp_sec": 10.44
+    },
+    {
+      "track_id": 143,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 262,
+      "timestamp_sec": 10.48
+    },
+    {
+      "track_id": 172,
+      "vehicle_type": "truck",
+      "violation_type": "wrong_way",
+      "frame": 271,
+      "timestamp_sec": 10.84
+    },
+    {
+      "track_id": 179,
+      "vehicle_type": "motorcycle",
+      "violation_type": "restricted_zone",
+      "frame": 275,
+      "timestamp_sec": 11.0
+    },
+    {
+      "track_id": 180,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 280,
+      "timestamp_sec": 11.2
+    },
+    {
+      "track_id": 157,
+      "vehicle_type": "car",
+      "violation_type": "restricted_zone",
+      "frame": 286,
+      "timestamp_sec": 11.44
+    },
+    {
+      "track_id": 182,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 286,
+      "timestamp_sec": 11.44
+    },
+    {
+      "track_id": 186,
+      "vehicle_type": "car",
+      "violation_type": "wrong_way",
+      "frame": 297,
+      "timestamp_sec": 11.88
+    }
+  ]
+}
