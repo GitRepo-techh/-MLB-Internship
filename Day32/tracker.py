@@ -1,12 +1,3 @@
-"""
-tracker.py
-----------
-Thin wrapper around Ultralytics YOLOv8 + ByteTrack.
-
-Detects vehicles (car, motorcycle, bus, truck) in a frame and assigns
-each one a persistent tracking ID across frames using model.track(persist=True).
-"""
-
 from ultralytics import YOLO
 
 # COCO class IDs for vehicle categories (used by stock yolov8n.pt / yolov8s.pt)
