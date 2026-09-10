@@ -15,10 +15,15 @@ import numpy as np
 import cv2
 import streamlit as st
 from ultralytics import YOLO
+import imageio_ffmpeg
 
 st.set_page_config(page_title="Smart People Counting System", layout="wide")
 
 PERSON_CLASS_ID = 0  # COCO class 0 = person
+
+# Bundled static ffmpeg binary — works the same on Windows and Streamlit
+# Cloud, no system install or packages.txt entry required.
+FFMPEG_EXE = imageio_ffmpeg.get_ffmpeg_exe()
 
 
 @st.cache_resource
@@ -27,7 +32,7 @@ def load_model():
 
 
 def reencode_h264(raw_path: str, final_path: str) -> None:
-    cmd = ["ffmpeg", "-y", "-i", raw_path, "-vcodec", "libx264", "-pix_fmt", "yuv420p", final_path]
+    cmd = [FFMPEG_EXE, "-y", "-i", raw_path, "-vcodec", "libx264", "-pix_fmt", "yuv420p", final_path]
     subprocess.run(cmd, check=True, capture_output=True)
     os.remove(raw_path)
 
