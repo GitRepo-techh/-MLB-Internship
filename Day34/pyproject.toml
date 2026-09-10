@@ -1,0 +1,16 @@
+[project]
+name = "day34"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "imageio-ffmpeg>=0.6.0",
+    "lap>=0.5.13",
+    "numpy>=2.5.3",
+    "opencv-python-headless>=5.0.0.93",
+    "pillow>=12.3.0",
+    "pyngrok>=8.1.2",
+    "streamlit>=1.63.0",
+    "ultralytics>=8.4.146",
+]
