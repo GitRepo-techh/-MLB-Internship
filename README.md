@@ -2302,7 +2302,7 @@ motorcycles, buses, trucks) as they cross a defined line in traffic video,
 with a Streamlit interface for upload, processing, and download.
 
  ![App screenshot](app-screenshot.png)
-## Folder Contents
+## Folder Contents 
 
 - `vehicle_counter.py` — core detection, tracking, and counting logic
 - `app.py` — Streamlit application (upload → process → view/download)
