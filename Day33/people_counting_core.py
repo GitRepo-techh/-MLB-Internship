@@ -1,14 +1,3 @@
-"""
-Day 37 - People Counting & Crowd Analysis
-Coding Practice
-
-Detects people with YOLOv8, tracks them with ByteTrack (IDs stay consistent
-across frames), counts people per frame, draws boxes + confidence + track ID,
-overlays a live count, and saves an H.264 output video.
-
-Run:
-    uv run people_counting_core.py --input input_videos/video1.mp4
-"""
 
 import os
 import argparse
@@ -29,7 +18,7 @@ FFMPEG_EXE = imageio_ffmpeg.get_ffmpeg_exe()
 
 
 def reencode_h264(raw_path: str, final_path: str) -> None:
-    """Re-encode with ffmpeg so the output plays in browsers / Streamlit."""
+
     cmd = [
         FFMPEG_EXE, "-y", "-i", raw_path,
         "-vcodec", "libx264", "-pix_fmt", "yuv420p",

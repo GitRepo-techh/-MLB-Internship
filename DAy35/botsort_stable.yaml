@@ -1,0 +1,28 @@
+# botsort_stable.yaml
+# BoT-SORT config tuned for the "consistent IDs when vehicles cross" requirement.
+#
+# Compared to Ultralytics' default botsort.yaml, the main change is a longer
+# track_buffer: when a vehicle is briefly occluded by another one crossing its
+# path, the tracker keeps its "lost" track alive for longer before giving up,
+# so when the vehicle re-appears it's much more likely to be re-linked to its
+# original ID instead of being issued a brand-new one.
+#
+# with_reid is left False: true appearance-based re-identification needs an
+# extra ReID model (fast-reid/torchreid) downloaded and configured separately,
+# which adds real deployment risk on Streamlit Cloud for limited benefit at
+# this scale. Motion-based BoT-SORT with a longer buffer covers the common
+# "two cars cross paths for a few frames" case well on its own.
+
+tracker_type: botsort
+
+track_high_thresh: 0.5
+track_low_thresh: 0.1
+new_track_thresh: 0.6
+track_buffer: 60        # default is 30; doubled to survive longer occlusion
+match_thresh: 0.75       # default is 0.8; slightly more lenient re-matching
+fuse_score: True
+
+gmc_method: sparseOptFlow
+proximity_thresh: 0.5
+appearance_thresh: 0.25
+with_reid: False
