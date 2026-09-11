@@ -2301,6 +2301,8 @@ A YOLOv8-based system that detects, tracks, and counts vehicles (cars,
 motorcycles, buses, trucks) as they cross a defined line in traffic video,
 with a Streamlit interface for upload, processing, and download.
 
+  DAy35/app-screenshot.png
+  
 ## Folder Contents
 
 - `vehicle_counter.py` — core detection, tracking, and counting logic
